@@ -1,0 +1,15 @@
+@import '../../scss/index.scss';
+.menu-sider {
+    //position: fixed;
+    left: 0;
+    top: 65px;
+    height: calc(100vh - 65px);
+    overflow: auto;
+    /*
+    position: fixed;
+    top: 65px;
+    height: calc(100vh - 65px);
+    width: 200px;
+    background-color: $background-grey-dark;
+    */
+}

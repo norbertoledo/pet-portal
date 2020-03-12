@@ -1,3 +1,11 @@
+## No se icluyen las llaves de server y cliente:
+
+### SERVER
+functions/key.json
+
+### CLIENT
+src/services/firebase.js
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

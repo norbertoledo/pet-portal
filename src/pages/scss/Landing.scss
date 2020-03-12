@@ -1,0 +1,54 @@
+@import '../../scss/index.scss';
+.landing {
+    display: flex;
+    align-items: center;
+    width: 100vw;
+    h2 {
+        font-size: $font-size-title;
+        color: $font-light;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    &__col {
+        margin: 0 10%;
+    }
+    &__header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: auto;
+        background-color: $primary-color-dark;
+        padding: 60px 0;
+        img {
+            width: 100%;
+        }
+        width: 100%;
+    }
+    &__description {
+        display: flex;
+        flex: 1;
+        justify-content: center;
+        align-items: center;
+        background-color: $primary-color;
+        color: $font-light;
+        padding: 50px 0;
+        width: 100%;
+    }
+    &__download {
+        display: flex;
+        //flex: 1;
+        justify-content: center;
+        align-items: center;
+        background-color: $grey-color;
+        padding: 50px 0;
+        width: 100%;
+        &-logos {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        &-logo {
+            padding: 5px;
+        }
+    }
+}

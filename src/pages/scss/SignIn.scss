@@ -1,0 +1,72 @@
+@import '../../scss/index.scss';
+.signin {
+    display: flex;
+    background-color: transparent;
+    margin: 40px 0;
+    &__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        &-logo {
+            margin-bottom: 30px;
+            img {
+                width: 100%;
+            }
+        }
+        &-tabs {
+            background-color: $background-light;
+            .ant-tabs {
+                width: 90vw;
+                @media (min-width: $media-breakpoint-up-sm) {
+                    width: auto;
+                }
+            }
+            .ant-tabs-content {
+                padding: 10px 20px 0 20px !important;
+            }
+            .ant-tabs-nav {
+                width: 100%
+            }
+            .ant-tabs-nav-container {
+                height: 60px !important;
+            }
+            .ant-tabs-tab {
+                color: $font-grey;
+                width: 50%;
+                height: 60px !important;
+                text-align: center;
+                font-size: 0em + 18px / $font-size-default;
+                border-top: 4px solid $border-grey !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                @media (min-width: $media-breakpoint-up-sm) {
+                    width: 220px;
+                    font-size: 0em + 18px / $font-size-default;
+                }
+                &:hover {
+                    color: $font-grey-dark;
+                }
+                &:before {
+                    content: none;
+                }
+                span {
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+            .ant-tabs-tab-active {
+                color: $primary-color-dark !important;
+                border-color: $primary-color !important;
+                border-radius: 0 !important;
+                border-left: 0 !important;
+                border-right: 0 !important;
+            }
+            .ant-tabs-content {
+                padding: 16px;
+                padding-bottom: 0;
+            }
+        }
+    }
+}
