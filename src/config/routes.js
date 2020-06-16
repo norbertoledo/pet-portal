@@ -7,14 +7,17 @@ import LayoutSignIn from '../layouts/LayoutSignIn';
 import Landing from '../pages/Landing';
 import Admin from '../pages/Admin';
 import Users from '../pages/Users';
-import ErrorPage from '../pages/ErrorPage';
 import Services from '../pages/Services';
 import Places from '../pages/Places';
 import Tips from '../pages/Tips';
 import Links from '../pages/Links';
 import Categories from '../pages/Categories';
-import Regions from '../pages/Regions';
+import States from '../pages/States';
 import SignIn from '../pages/SignIn';
+
+// Error Page
+import ErrorPage from '../pages/ErrorPage';
+
 
 const routes = [
     {
@@ -41,15 +44,8 @@ const routes = [
             },
             {
                 path: "/admin/login",
-                component: LayoutSignIn,
-                exact: true,
-                routes:[
-                    {
-                        path: "/admin/login",
-                        component: SignIn,
-                        exact: true
-                    }
-                ]
+                component: SignIn,
+                exact: true
             },
             {
                 path: "/admin/users",
@@ -82,10 +78,10 @@ const routes = [
                 exact: true
             },
             {
-                path: "/admin/regions",
-                component: Regions,
+                path: "/admin/states",
+                component: States,
                 exact: true
-            },
+            }
         ]
     },
     {

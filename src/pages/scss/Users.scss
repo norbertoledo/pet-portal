@@ -1,5 +1,5 @@
 @import '../../scss/index.scss';
-.signin {
+.users {
     display: flex;
     background-color: transparent;
     margin: 40px 0;
@@ -7,12 +7,6 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        &-logo {
-            margin-bottom: 30px;
-            img {
-                width: 100%;
-            }
-        }
         &-tabs {
             background-color: $background-light;
             .ant-tabs {
@@ -22,7 +16,7 @@
                 }
             }
             .ant-tabs-content {
-                //padding: 10px 20px 0 20px !important;
+                padding: 10px 20px 0 20px !important;
             }
             .ant-tabs-nav {
                 width: 100%
@@ -64,7 +58,7 @@
                 border-right: 0 !important;
             }
             .ant-tabs-content {
-                padding: 15px;
+                padding: 16px;
                 padding-bottom: 0;
             }
         }

@@ -1,8 +1,4 @@
 //** TYPES **//
-export const SIGNUP_USER_START = 'SIGNUP_USER_START';
-export const SIGNUP_USER_SUCCESS = 'SIGNUP_USER_SUCCESS';
-export const SIGNUP_USER_ERROR = 'SIGNUP_USER_ERROR';
-
 export const LOGIN_USER_START = 'LOGIN_USER_START';
 export const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS';
 export const LOGIN_USER_ERROR = 'LOGIN_USER_ERROR';
@@ -14,7 +10,7 @@ export const LOGOUT_USER_ERROR = 'LOGOUT_USER_ERROR';
 
 
 //** REDUCERS **//
-const initialState = {isLogged: false, isLoading: false, error: false, data:{}};
+const initialState = {isLogged: false, isLoading: true, authError: false, authData:{data:{}, message:""}};
 
 export default (state=initialState, action)=>{
     switch(action.type){
@@ -22,7 +18,10 @@ export default (state=initialState, action)=>{
         case LOGIN_USER_START:
             return {
                 ...state, 
-                isLoading: true
+                isLoading: true,
+                isLogged: false,
+                authError: false,
+                authData: initialState.authData
             };
 
         case LOGIN_USER_SUCCESS:
@@ -30,15 +29,17 @@ export default (state=initialState, action)=>{
                 ...state,
                 isLoading: false,
                 isLogged: true,
-                data: action.payload
+                authError: false,
+                authData: action.payload
             }
 
         case LOGIN_USER_ERROR:
             return {
                 ...state,
                 isLoading: false,
-                error: true,
-                data: action.payload
+                isLogged: false,
+                authError: true,
+                authData: action.payload
             }
         
         case LOGOUT_USER_START:
@@ -52,38 +53,19 @@ export default (state=initialState, action)=>{
                 ...state,
                 isLoading: false,
                 isLogged: false,
-                data: action.payload
+                authError: false,
+                authData: action.payload
             }
 
         case LOGOUT_USER_ERROR:
             return {
                 ...state,
                 isLoading: false,
-                error: true,
-                data: action.payload
-            }
-            
-        case SIGNUP_USER_START:
-            return {
-                ...state, 
-                isLoading: true
-            };
-
-        case SIGNUP_USER_SUCCESS:
-            return {
-                ...state,
-                isLoading: false,
-                isLogged: true,
-                data: action.payload
+                isLogged: false,
+                authError: true,
+                authData: action.payload
             }
 
-        case SIGNUP_USER_ERROR:
-            return {
-                ...state,
-                isLoading: false,
-                error: true,
-                data: action.payload
-            }
 
         default:
             return state;
@@ -119,15 +101,3 @@ export const logoutUserError = (payload) => ({
 });
 
 
-// SIGNUP
-export const signupUserStart = () => ({
-    type: SIGNUP_USER_START,
-});
-export const signupUserSuccess = (payload) => ({
-    type: SIGNUP_USER_SUCCESS,
-    payload: payload
-});
-export const signupUserError = (payload) => ({
-    type: SIGNUP_USER_ERROR,
-    payload: payload
-});

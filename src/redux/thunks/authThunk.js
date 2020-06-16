@@ -1,4 +1,5 @@
-//import {useHistory} from 'react-router-dom';
+import { ACCESS_TOKEN } from '../../utils/constants';
+
 // importar acciones
 import {
     loginUserStart, 
@@ -6,35 +7,63 @@ import {
     loginUserError, 
     logoutUserStart, 
     logoutUserSuccess, 
-    logoutUserError, 
-    signupUserStart, 
-    signupUserSuccess, 
-    signupUserError
+    logoutUserError
 } from '../ducks/authDuck';
 
 // Thunks - Llamados externos - Efectos
 export const loginThunk = ( payload ) => 
 
 
-    async (dispatch, getState, {auth}) => {
+    async (dispatch, getState, {auth, db}) => {
     
         const {email, password}=payload;
 
         dispatch(loginUserStart());
+
         try{
-            await auth.signInWithEmailAndPassword( email, password );     
+
+            const loginData = await auth.signInWithEmailAndPassword( email, password );
             
-            auth.onAuthStateChanged( user => {
-                if(user){
-                    console.log('[loginThunk]-> user',user)
-                    dispatch(loginUserSuccess(user));
-                }else{
-                    //dispatch(loginUserError(user))
+            const {user} = loginData;
+
+            if(user){
+                
+                try{
+
+                    const snap = await db.collection('users').doc(user.uid).get();
+                        
+                    const data = snap.data();
+                    
+                    //console.log('[USER ADMIN ROLE]->', data.role.admin);
+                    
+                    if(data.role.admin){
+                        //console.log("USER LOGIN ->", data.name)
+                        try{
+                            const userToken = await auth.currentUser.getIdToken(/* forceRefresh */ true);    
+                            // Send token to your backend via HTTPS
+                            const userData = {token:userToken, email:data.email}
+                            localStorage.setItem(ACCESS_TOKEN, JSON.stringify(userData));
+                            dispatch(loginUserSuccess({data:data, action:"login", message:"Autenticado con éxito"}));
+                        }catch(e){
+                            dispatch(loginUserError({data:{}, action:"login", message:e.message}));
+                        }
+                    }else{
+                        //console.log('[ERROR]->', "No es Administrador");
+                        dispatch(loginUserError({data:{}, action:"login", message: "No dispone de permisos"}));
+                    }
+                   
+                }catch(e){
+                    //console.log('[ERROR]->', e.message);
+                    dispatch(loginUserError({data:{}, action:"login", message:e.message}));
                 }
-            })
-        }catch(err){
-            console.log('ERROR: ', err.message);
-            dispatch(loginUserError(err));
+            }else{
+                dispatch(loginUserError({data:{}, action:"login", message:'No ha iniciado sesión'}));
+            }
+             
+
+        }catch(e){
+            //console.log(e.message);
+            dispatch(loginUserError({data:{}, action:"login", message:e.message}));
         }
     
     };
@@ -44,72 +73,61 @@ export const logoutThunk = () =>
     async (dispatch, getState, {auth}) => {
         dispatch(logoutUserStart());
         try{
+            localStorage.clear();
             await auth.signOut();
-            dispatch(logoutUserSuccess({}));
-        }catch(err) {
-            dispatch(logoutUserError(err));
+            dispatch(logoutUserSuccess({data:{}, action:"logout", message:"Hasta Pronto!"}));
+        }catch(e) {
+            dispatch(logoutUserError({data:{}, action:"logout", message: e.message}));
         };
     }
 
-export const signupThunk = ( payload ) => 
 
-    async (dispatch, getState, { auth, db }) => {
-        
-        const {email, password, name}=payload;
 
-        dispatch(signupUserStart());
-        try{
-            const {user} = await auth.createUserWithEmailAndPassword( email, password );
-            
-            const uid =  user ? user.uid : undefined;
-            console.log("uid:", uid);
-            
-            const doc = db.collection('usuarios').doc(uid);
+   export const isLoggedThunk = () =>
+   async ( dispatch, getState, {db, auth}) => {
 
-            await doc.set( 
-                {
-                    email: user.email,
-                    nombre: name,
-                    provinciaId: 'AlicanteId',
-                    rol: {
-                        admin: true,
-                        profesional: false,
-                        usuario: false
-                    },
-                    uid: user.uid,
-                } 
-            
-            );
-            
-            auth.onAuthStateChanged( user => {
-                if(user){
-                    dispatch(signupUserSuccess(user));
-                }else{
-                    //dispatch(signupUserError(user))
-                }
-            })
-        }catch(err){
-            console.log('ERROR: ', err.message);
-            dispatch(signupUserError(err));
-        }
-        
-    
-    };
-
-export const checkIsLogged = () =>
-    async ( dispatch, getState, {auth}) => {
+       
+       auth.onAuthStateChanged ( async user => {
+        const localToken = JSON.parse(localStorage.getItem(ACCESS_TOKEN));
         
         dispatch(loginUserStart());
-        
-        auth.onAuthStateChanged( user => {
-            console.log('user', user);
-            if(user){
-              dispatch(loginUserSuccess(user));
-            }else{
-              dispatch(loginUserError('No ha iniciado sesión'));
-            }
-            
-          })
-    }
+        if(localToken && localToken != null){
 
+            try{
+                
+                const snap = await db.collection('users').doc(user.uid).get();
+                const userData = snap.data();
+    
+                try{
+                const userToken = await user.getIdToken();
 
+                if(localToken.token === userToken){ 
+                    //console.log("coinciden los token");
+                    dispatch(loginUserSuccess({data:userData, action:"login", message:"Autenticado con éxito"}));
+                }else{
+                    if(localToken.email === userData.email ){
+                        //console.log("No coinciden los tokens pero si el mail");
+                        //sesion expirada
+                        //console.log("sesion experiada");
+                        dispatch(loginUserError({data:{}, action:"login", message:"La sesion ha expirado"}));
+                    }else{
+                        //console.log("No coincide ni el token ni el mail")
+                        dispatch(loginUserError({data:{}, action:"login", message:"No ha iniciado sesión"}));
+                    }
+                }
+            }catch(e) {
+                dispatch(loginUserError({data:{}, action:"login", message:e.message}));
+            };
+    
+    
+            }catch(e) {
+                dispatch(loginUserError({data:{}, action:"login", message:e.message}));
+            };
+
+        }else{
+            dispatch(loginUserError({data:{}, action:"login", message:""}));
+        }
+         
+       });           
+
+   }

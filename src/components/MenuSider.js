@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, withRouter} from 'react-router-dom';
 import {Layout, Menu} from 'antd';
 import './scss/MenuSider.scss';
 import { 
@@ -13,11 +13,13 @@ import {
     MessageOutlined
 } from '@ant-design/icons';
 
-export default function MenuSider(props) {
+function MenuSider(props) {
     
-    const {isCollapased} = props;
+    const {isCollapased, location} = props;
     const {Sider} = Layout;
     const {Item} = Menu;
+
+    //console.log(props);
     return (
         <Sider 
             className="menu-sider" 
@@ -30,49 +32,54 @@ export default function MenuSider(props) {
             <Menu
                 theme="dark"
                 mode="inline"
-                defaultSelectedKeys={["1"]}
+                defaultSelectedKeys={[location.pathname]}
             >
-                <Item key="1">
+                <Item key="/admin">
                     <Link to={"/admin"}/>
                     <HomeOutlined />
                     <span className="nav-text">Homepage</span>
                 </Item>
-                <Item key="2">
+                <Item key="/admin/users">
                     <Link to={"/admin/users"}/>
                     <TeamOutlined />
                     <span className="nav-text">Usuarios</span>
                 </Item>
-                <Item key="3">
+                <Item key="/admin/services">
                     <Link to={"/admin/services"}/>
                     <ShopOutlined />
                     <span className="nav-text">Servicios</span>
                 </Item>
-                <Item key="4">
+                <Item key="/admin/places">
                     <Link to={"/admin/places"}/>
                     <EnvironmentOutlined />    
                     <span className="nav-text">Lugares</span>
                 </Item>
-                <Item key="5">
+                <Item key="/admin/tips">
                     <Link to={"/admin/tips"}/>
                     <MessageOutlined />
                     <span className="nav-text">Tips</span>
                 </Item>
-                <Item key="6">
+                <Item key="/admin/links">
                     <Link to={"/admin/links"}/>
                     <LinkOutlined />
                     <span className="nav-text">Links</span>
                 </Item>
-                <Item key="7">
+                <Item key="/admin/categories">
                     <Link to={"/admin/categories"}/>
                     <UnorderedListOutlined />
-                    <span className="nav-text">Categorias</span>
+                    <span className="nav-text">Categorías</span>
                 </Item>
-                <Item key="8">
-                    <Link to={"/admin/regions"}/>
+                
+                <Item key="/admin/states">
+                    <Link to={"/admin/states"}/>
                     <CompassOutlined />
-                    <span className="nav-text">Provincias</span>
+                    <span className="nav-text">Regiones</span>
                 </Item>
+                
             </Menu>
         </Sider>
     )
 }
+
+
+export default withRouter(MenuSider);

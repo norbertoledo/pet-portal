@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useCallback, Suspense} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import { Route, Redirect } from 'react-router-dom';
-import {Layout} from 'antd';
+import { Route, Redirect, withRouter } from 'react-router-dom';
+import {Layout, notification} from 'antd';
 
 
 import './scss/LayoutAdmin.scss';
@@ -9,18 +9,18 @@ import MenuTop from '../components/MenuTop';
 import MenuSider from '../components/MenuSider';
 
 
-import { checkIsLogged, logoutThunk } from '../redux/thunks/authThunk';
+import { isLoggedThunk, logoutThunk } from '../redux/thunks/authThunk';
+import { fetchStatesThunk } from '../redux/thunks/statesThunk';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 
 const LayoutAdmin = props => {
     
     const { Header, Content, Footer } = Layout;
-    const { routes } = props;
-
+    const { routes, location:{pathname} } = props;
     const [isCollapased, setIsCollapsed] = useState(false);
     
-    const {isLogged, isLoading} = useSelector(state=>state.auth);
+    const {isLogged, isLoading, authError, authData} = useSelector(state=>state.auth);
 
     const dispatch = useCallback(useDispatch(),[]);
 
@@ -35,22 +35,65 @@ const LayoutAdmin = props => {
         dispatch( logoutThunk() );
     }
 
+    const openNotificationError = () => {
+        if(authData.message!==""){
+            notification.error({
+                message: authData.message  
+            });
+        }
+
+      };
+    
+      const openNotificationSuccess = () => {
+        console.log("data",authData);
+        notification.success({
+            message: authData.message,
+            description: "Bienvenid@ "+authData.data.name  
+        });
+
+      };
+
+      const openNotificationLogout = () => {
+        console.log("data",authData);
+        notification.info({
+            message: authData.message,
+        });
+
+      };
+
 
     useEffect(()=>{
-        dispatch( checkIsLogged() );
-    },[dispatch]);
+        dispatch( isLoggedThunk() );
+    },[]);
+
+    useEffect(()=>{
+        if(authData.action === "logout") {openNotificationLogout()};
+        if(authError) {openNotificationError()};
+        if(!authError && Object.keys(authData.data).length>0) {
+            openNotificationSuccess()
+        };
+        
+
+    },[dispatch, authError, authData]);
+
+    useEffect(()=>{
+        if(isLogged){
+            dispatch(fetchStatesThunk());
+        }
+    },[dispatch, isLogged]);
 
 
- 
     return(
         <>
             {
-                isLoading 
+                
+                isLoading
                 ? <div className="layout-spinner"><LoadingSpinner/></div>
                 : <Suspense fallback={ <div><LoadingSpinner/></div> }>
 
-                    {
-                        !isLogged
+                    {                       
+                        
+                        !isLogged && !isLoading
                         ? <>
                             <Redirect to="/admin/login" />
                             <Layout className="layout-signin">
@@ -65,7 +108,7 @@ const LayoutAdmin = props => {
                             </Layout>
                         </>
                         : <>
-                            <Redirect to="/admin" />
+                            <Redirect to={pathname === "/admin/login" ? "/admin" : pathname} />
                             <Layout>
                     
                                 <MenuSider isCollapased={isCollapased}/>
@@ -114,4 +157,4 @@ const RouteWithSubRoutes = (route)=>{
     )
   }
 
-export default LayoutAdmin;
+export default withRouter(LayoutAdmin);

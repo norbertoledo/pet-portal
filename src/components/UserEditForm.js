@@ -1,17 +1,30 @@
-import React, {useState} from 'react'
+import React, {useState, useCallback, useEffect} from 'react'
 import { Form, Input, Select, Button} from 'antd';
 import { MailOutlined, UserOutlined, LockOutlined, CheckOutlined, CompassOutlined, CameraOutlined } from '@ant-design/icons';
-import UploadAvatar from './UploadAvatar';
-import './scss/UserSignUpForm.scss';
+import UploadAvatar from './UploadAvatar'
+import './scss/UserEditForm.scss';
 
-export default function SignupForm({handleSignup, states, roles}) {
-    
+export default function UserEditForm({handleEdit, user, states, roles}) {
     const { Option } = Select;
-    const [userData, setUserData]=useState({});
+    const {email, name, city, role, isActive, photoUrl}=user;
+    const [userData, setUserData]=useState(user);
     const [avatar, setAvatar]=useState(null);
 
-    const handleForm = (value)=>{
+    console.log(avatar);
 
+    const getRole = ()=>{
+        const selectedKey = Object.keys(role).filter(
+            (key)=>{
+                return role[key]===true
+            }
+        );
+        return selectedKey[0].toString();
+    }
+    
+    const handleForm = (value)=>{
+        
+        console.log("value",value);
+        //console.log("userData.role: "+userData.role)
         if(value.role!==undefined){
             let newUserRole = {
                 admin: false,
@@ -45,60 +58,49 @@ export default function SignupForm({handleSignup, states, roles}) {
             userData.role = newUserRole;
         }
 
-        
-        if(avatar!==null){
-            console.log("dataToSend", {...userData, avatar});
-            handleSignup({...userData, avatar});
+        //console.log("userData", {...userData, avatar});
+        if(avatar.preview!==photoUrl){
+            handleEdit({...userData, avatar});
         }else{
-            console.log("dataToSend", userData);
-            handleSignup(userData);
+            handleEdit(userData);
         }
-        
     }
 
+    useEffect(()=>{
+       
+        if(photoUrl.length>0){
+            setAvatar({...avatar, preview:user.photoUrl});
+        }
+        
+    },[user.photoUrl])
+    
+
     return (
-        <div className="user-signup-form">
+        <div className="user-edit-form">
             <UploadAvatar
                 className=""
                 avatar={avatar}
                 setAvatar={setAvatar}
-            />                  
-        <Form
-                    name="normal_login"
-                    className="login-form"
-
+            />
+            <Form
+                    name="edit_form"
+                    className="edit-form"
                     onFinish={handleForm}
                     >
                     <Form.Item
                         name="email"
                         rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Ingrese un Email!',
                         },
                         ]}
                     >
                         <Input 
+                        disabled={true}
                         prefix={<MailOutlined className="site-form-item-icon" />} 
-                        placeholder="Email" 
-                        onChange={ e=>setUserData( {...userData, email:e.target.value} )  }
-                        />
-                    </Form.Item>
-                    
-                    <Form.Item
-                        name="password"
-                        rules={[
-                        {
-                            required: true,
-                            message: 'Ingrese un password!',
-                        },
-                        ]}
-                    >
-                        <Input
-                        prefix={<LockOutlined className="site-form-item-icon" />}
-                        type="password"
-                        placeholder="Password"
-                        onChange={ e=>setUserData( {...userData, password:e.target.value} )  }
+                        placeholder="Email"
+                        defaultValue={email}
                         />
                     </Form.Item>
 
@@ -106,7 +108,7 @@ export default function SignupForm({handleSignup, states, roles}) {
                         name="name"
                         rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Ingrese un nombre!',
                         },
                         ]}
@@ -114,6 +116,8 @@ export default function SignupForm({handleSignup, states, roles}) {
                         <Input 
                         prefix={<UserOutlined className="site-form-item-icon" />} 
                         placeholder="Nombre" 
+                        defaultValue={name}
+                        value={name}
                         onChange={ e=>setUserData( {...userData, name:e.target.value} )  }
                         />
                     </Form.Item>
@@ -124,14 +128,13 @@ export default function SignupForm({handleSignup, states, roles}) {
                         name="role"
                         rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Ingrese un rol!',
                         },
                         ]}
                     >
 
                         <Select
-                            
                             showSearch
                             allowClear
                             placeholder={
@@ -140,6 +143,9 @@ export default function SignupForm({handleSignup, states, roles}) {
                                 &nbsp; Rol
                                 </React.Fragment>
                             }
+                            
+                            defaultValue={getRole}
+
                             optionFilterProp="children"
                             onChange={ e=>setUserData( {...userData, role:e} )  }
                             filterOption={(input, option) =>
@@ -163,7 +169,6 @@ export default function SignupForm({handleSignup, states, roles}) {
                                 </Select.Option>
                             ))
                         }
-                        
                         </Select>
                         
                     </Form.Item>
@@ -175,7 +180,7 @@ export default function SignupForm({handleSignup, states, roles}) {
                         name="region"
                         rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Ingrese una region!',
                         },
                         ]}
@@ -193,6 +198,7 @@ export default function SignupForm({handleSignup, states, roles}) {
                                 &nbsp; Seleccione una región
                                 </React.Fragment>
                             }
+                            defaultValue={city}
                             onChange={ e=>setUserData( {...userData, city:e} )  }
                             optionFilterProp="children"
                             //style={{ width: '75%' }}
@@ -234,7 +240,7 @@ export default function SignupForm({handleSignup, states, roles}) {
                         name="isActive"
                         rules={[
                         {
-                            required: true,
+                            required: false,
                             message: 'Ingrese estado de actividad!',
                         },
                         ]}
@@ -250,6 +256,7 @@ export default function SignupForm({handleSignup, states, roles}) {
                                 &nbsp; Es activo?
                                 </React.Fragment>
                             }
+                            defaultValue={isActive}
                             onChange={ e=>setUserData( {...userData, isActive:e} )  }
                             optionFilterProp="children"
                             filterOption={(input, option) =>
@@ -263,14 +270,12 @@ export default function SignupForm({handleSignup, states, roles}) {
                         </Select>
                         
                     </Form.Item>
-
-
-                    
+                   
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit" className="login-form-button"
                         >
-                        Crear usuario
+                        Editar usuario
                         </Button>
                     </Form.Item>
                 </Form>
