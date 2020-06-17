@@ -17,36 +17,18 @@ const os = require('os');
 const fs = require('fs');
 const Busboy = require('busboy');
 
-/** STORAGE */
 
-/*
-const {Storage} = require('@google-cloud/storage');
-const storage = new Storage({
-    keyFileNamePath: path.join(__dirname, "key.json"),
-    projectId: "pet-portal"
-});
-*/
-
-const serviceAccount = require("./key.json");
 
 admin.initializeApp({
-    //credential: admin.credential.cert(serviceAccount),
     credential: admin.credential.applicationDefault(),
     storageBucket: "pet-portal.appspot.com"
 });
 
-
-/*
-admin.initializeApp({
-    ©
-});
-*/
 const db = admin.firestore();
 const auth = admin.auth();
 const storage = admin.storage();
-const petPortalBucket = admin.storage().bucket();
+const petPortalBucket = storage.bucket();
 
-//const petPortalBucket = storage.bucket('pet-portal.appspot.com');
 
     const app = express();
     
@@ -65,7 +47,7 @@ const petPortalBucket = admin.storage().bucket();
 
             const { uid, email } = await auth.verifyIdToken( token );
             
-            console.log('[Middleware]->uid', uid);
+            //console.log('[Middleware]->uid', uid);
 
             // Mutar el objeto de request para agregar las propiedades de uid e email
             Object.assign( req, {
@@ -73,7 +55,7 @@ const petPortalBucket = admin.storage().bucket();
                     email,
             })
             res.status(200);
-            console.log('[Middleware]->uid', req);
+            //console.log('[Middleware]->uid', req);
             return next();
 
         } catch (e){
@@ -88,12 +70,13 @@ const petPortalBucket = admin.storage().bucket();
 
     // DELETE USER FIREBASE AUTH
     app.post("/api/deleteuser", async(req, res)=>{
-
-        const {email} = JSON.parse(req.body);
-       
+        
         try{
-            const userRecord = await auth.getUserByEmail(email)
-            const response = userRecord.toJSON();            
+            const {emailtodelete} = req.body.data;
+                        
+            const userRecord = await auth.getUserByEmail(emailtodelete)
+            const response = userRecord.toJSON();               
+                     
             try{
                 await auth.deleteUser(response.uid)
                 res.status(200).send({message: 'Usuario borrado exitosamente'});
@@ -102,12 +85,12 @@ const petPortalBucket = admin.storage().bucket();
                 res.status(400).send({message: 'Error al borrar usuario'});
                 console.log('Error deleting user:', e.message);
             }
+            
 
         }catch(e){
             console.log('Error Obtener usuario:', e.message);
             res.status(400);
         }
-
 
     });
 

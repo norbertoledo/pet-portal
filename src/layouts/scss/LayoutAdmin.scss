@@ -36,15 +36,20 @@
         width: 100%;
         height: 65px;
         background-color: $primary-color-dark;
+        z-index: 100;
     }
     &__content {
         min-height: calc(100vh - 65px);
         padding: 90px 25px 25px 25px;
     }
     &__footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
         text-align: center;
         background-color: $background-grey-dark;
-        padding: 20px;
         color: $font-light;
+        z-index: 2;
     }
 }

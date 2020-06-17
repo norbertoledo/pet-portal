@@ -16,6 +16,8 @@ import {
     fetchUsersError,
 } from '../ducks/usersDuck';
 
+import axios from 'axios';
+
 export const resetUserDataThunk = ()=>
     async (dispatch, getState) => {
         dispatch(resetUserData());
@@ -167,37 +169,21 @@ export const fetchUsersThunk = () =>
         }
     }
 
-
 export const deleteUserThunk = (payload) =>
-    async(dispatch, getstate, {auth, db, storage}) =>{
+    async(dispatch, getstate, {db, storage}) =>{
 
-        const user = auth.currentUser;
         const url = "/api/deleteuser";
-        const postData = {email: payload.email};
-        let userToken = null;
+        const postData = {emailtodelete: payload.email};
         const {uid, name, photoUrl} = payload;
         const storageRef = storage.ref();
         const imgRef = storageRef.child('users/'+uid);
        
         dispatch(deleteUserStart());
 
-        // GET USER BY EMAIL AT FIREBASE
+        // DELETE USER FIREBASE AUTH BY EMAIL
         try{
-            userToken = await user.getIdToken();
-        }catch(e){
-            console.log("Error obtenerToken: "+e.message)
-            dispatch(deleteUserError({status:400, action:"delete", message:"No se pudo obtener Token"}))
-            return;
-        }
-
-        // DELETE USER FIREBASE
-        try{
-            const response = await fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(postData),
-                headers:{
-                    authorization: userToken    
-                }
+            const response = await axios.post(url, {
+                data: postData,
             })
             console.log("RESPONSE FETCH: ", response.status)
         }catch(e){
@@ -205,7 +191,7 @@ export const deleteUserThunk = (payload) =>
             dispatch(deleteUserError({status:400, action:"delete", message:"No se pudo borrar el usuario de firebase"}))
             return;
         }
-
+        
         // DELETE USER DB
         try{
             await db.collection("users").doc(uid).delete();
@@ -325,3 +311,13 @@ export const editUserThunk = (payload) =>
 
     }
 
+
+/*
+// Axios interceptor
+axios.interceptors.request.use(function (config) {
+    const {token} = JSON.parse(localStorage.getItem(ACCESS_TOKEN));
+    config.headers.authorization =  token;
+
+    return config;
+});
+*/
