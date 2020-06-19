@@ -1,7 +1,6 @@
 // Layouts
 import LayoutAdmin from '../layouts/LayoutAdmin';
 import LayoutLanding from '../layouts/LayoutLanding';
-import LayoutSignIn from '../layouts/LayoutSignIn';
 
 // Pages
 import Landing from '../pages/Landing';

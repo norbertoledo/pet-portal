@@ -6,6 +6,8 @@ import linksReducer from './ducks/linksDuck';
 import tipsReducer from './ducks/tipsDuck';
 import placesReducer from './ducks/placesDuck';
 import servicesReducer from './ducks/servicesDuck';
+import categoriesPlacesReducer from './ducks/categoriesPlacesDuck';
+import categoriesServicesReducer from './ducks/categoriesServicesDuck';
 
 
 export const rootReducer =  combineReducers(
@@ -16,7 +18,8 @@ export const rootReducer =  combineReducers(
         links: linksReducer,
         tips: tipsReducer,
         places: placesReducer,
-        services: servicesReducer
-
+        services: servicesReducer,
+        categoriesPlaces: categoriesPlacesReducer,
+        categoriesServices: categoriesServicesReducer,
     }
 );

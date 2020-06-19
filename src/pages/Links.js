@@ -1,62 +1,106 @@
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchLinksThunk } from '../redux/thunks/linksThunk';
+import { fetchLinksThunk, createLinkThunk, editLinkThunk, deleteLinkThunk, resetLinkDataThunk } from '../redux/thunks/linksThunk';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Layout, Tabs, notification } from 'antd';
+import { Layout, notification } from 'antd';
+import LinksList from '../components/LinksList';
 
 export default function Links() {
 
     const { Content } = Layout;
-    const { TabPane } = Tabs;
-    const {isLoading, linksError, linksData} = useSelector(state=>state.links);
     const dispatch = useDispatch();
-    const [links, setLinks] = useState([]);
     
+    const {linkError:itemError, linkData:itemData, linksData:itemsData} = useSelector(state=>state.links);
+    const [items, setItems] = useState([]);
+    const [dispatchResponse, setDispatchResponse]=useState(false);
+
+    const setItemsLists = useCallback((items)=>{   
+        const activeItems = items.filter(item=>item.isActive);
+        const inactiveItems = items.filter(item=>!item.isActive);
+        const refactorItems = [activeItems, inactiveItems];
+        setItems(refactorItems);
+    },[]);
+    
+    
+    const openNotificationError = useCallback(() => {    
+        notification.error({
+            message: itemData.message  
+        });
+    },[itemData]);
+    
+    const openNotificationSuccess = useCallback(() => {
+        console.log("data",itemData);
+        notification.success({
+            message: itemData.message
+        });
+    },[itemData]);
+    
+    // HANDLERS
+
+    const handleCreate = (payload) => {
+        console.log('[CREATE LINK: handleCreate]->', payload);       
+        dispatch( createLinkThunk(payload) );
+    }
+
+    const handleDelete = (payload) => {
+        console.log('[DELETE LINK: handleDelete]->', payload);       
+        dispatch( deleteLinkThunk(payload) );
+    }
+
+    const handleEdit = (payload) => {
+        console.log('[EDIT LINK: handleEdit]->', payload);       
+        dispatch( editLinkThunk(payload) );
+    }
+
+
+    useEffect(()=>{
+        if(itemError) {
+            openNotificationError()
+            setDispatchResponse(false);
+        };
+        if(!itemError && itemData.status === 200) {
+            openNotificationSuccess();
+            dispatch(fetchLinksThunk());
+            setDispatchResponse(true);
+            dispatch(resetLinkDataThunk());
+        };
+
+    },[dispatch, itemError, itemData, openNotificationError, openNotificationSuccess]);
+
     useEffect(()=>{
         dispatch(fetchLinksThunk());
     },[dispatch]);
 
     useEffect(()=>{
-        setLinks(linksData.data);
-    },[linksData.data]);
-
-    console.log("LINKS -> ", links);
+        if(itemsData.data.length>0){
+            setItemsLists(itemsData.data);
+        };
+    },[itemsData, setItemsLists]);
 
 
     return (
 
-        <Layout className="users">
-            <Content className="users__content">
-            {
-                !links.length>0
-                ? <div className="layout-spinner"><LoadingSpinner/></div>
-                : <Suspense fallback={ <div><LoadingSpinner/></div> }></Suspense>
-            }
-                
-                
-                <div className="users__content-tabs">
-                    <Tabs type="card">
-                        <TabPane tab={<span>Lista de links</span>} key="1">
-                            <div>
-                                {
-                                    links.map( (item,index ) => (
-                                        <div key={index}>
-                                            <h2>{item.title}</h2>
-                                            <p>{item.description}</p>
-                                            <p>{item.link}</p>
-                                            <hr/>
-                                        </div>
-                                    ))
-                                }
-                            </div>
-                        </TabPane>
-                        <TabPane tab={<span>Crear nuevo link</span>} key="2">
-                            
-                        </TabPane>
-                    </Tabs>
-                </div>
-            </Content>
-        </Layout>
+        <Layout className="items">
+        <Content className="items__content">
+        {
+            !items.length>0
+            ? 
+            <div className="layout-spinner"><LoadingSpinner/></div>
+            : 
+            <LinksList
+                activeItems={items[0]}
+                inactiveItems={items[1]}
+                handleCreate={handleCreate}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                dispatchResponse={dispatchResponse}
+                setDispatchResponse={setDispatchResponse}
+            />
+
+        }
+
+        </Content>
+    </Layout>
         
     )
 }

@@ -1,6 +1,6 @@
-import React, {useState, useCallback, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import { Form, Input, Select, Button} from 'antd';
-import { MailOutlined, UserOutlined, LockOutlined, CheckOutlined, CompassOutlined, CameraOutlined } from '@ant-design/icons';
+import { MailOutlined, UserOutlined, CheckOutlined, CompassOutlined } from '@ant-design/icons';
 import UploadAvatar from './UploadAvatar'
 import './scss/UserEditForm.scss';
 
@@ -69,10 +69,10 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
     useEffect(()=>{
        
         if(photoUrl.length>0){
-            setAvatar({...avatar, preview:user.photoUrl});
+            setAvatar({...avatar, preview:photoUrl});
         }
         
-    },[user.photoUrl])
+    },[photoUrl, avatar])
     
 
     return (

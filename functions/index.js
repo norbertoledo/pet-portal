@@ -12,9 +12,7 @@ const { uuid } = require('uuidv4');
  * @param {Object} req Cloud Function request context.
  * @param {Object} res Cloud Function response context.
  */
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
+
 const Busboy = require('busboy');
 
 
@@ -42,12 +40,12 @@ const petPortalBucket = storage.bucket();
             return next();
         }
         const token = req.headers.authorization;
-
+        console.log('[Middleware]->token', token);
         try {
 
             const { uid, email } = await auth.verifyIdToken( token );
             
-            //console.log('[Middleware]->uid', uid);
+            console.log('[Middleware]->uid', uid);
 
             // Mutar el objeto de request para agregar las propiedades de uid e email
             Object.assign( req, {
@@ -112,7 +110,7 @@ const petPortalBucket = storage.bucket();
                 name,
                 city,
                 photoUrl,
-                isActive: false,
+                isActive: true,
                 role: {
                     admin: false,
                     customer: false,
@@ -296,9 +294,9 @@ const petPortalBucket = storage.bucket();
 
     // GET LINKS
     app.get("/links", async (req, res)=>{
-        
+        console.log(["GET LINKS"])
         try{
-            const snap = await db.collection('links').get();
+            const snap = await db.collection('links').where('isActive', '==', true).get();
             const data = snap.docs.map( item => item.data() );
             res.status(200).send(data);
         
@@ -310,11 +308,14 @@ const petPortalBucket = storage.bucket();
 
     // GET SERVICE CATEGORIES
     app.get("/services/categories", async(req, res)=>{
+        ["GET SERVICES CATEGORIES"]
         try{
-            const snap = await db.collection('services_category').get();
+            const snap = await db.collection('services_category').where('isActive', '==', true).orderBy('name').get();
             const data = snap.docs.map( item => item.data() );
+            console.log("[SERVICE RETURN DATA]->", data)
             res.status(200).send(data);
         }catch(error){
+            console.log("[SERVICE RETURN ERROR]->", error.message)
             res.status(400).send({message: 'Error. No se puedieron obtener las categorias', error});
         }
     });
@@ -322,6 +323,7 @@ const petPortalBucket = storage.bucket();
     // GET SERVICE
     app.get("/services/:state/:category", async(req, res)=>{
         const {state, category} = req.params;
+        console.log("[SERVICE STATE - CATEGORY]->", state, category)
         try{
             const snap = await db.collection('services').where("state", "==", state).where("category", "==", category).get();
             const data = snap.docs.map( item => item.data() );
@@ -334,7 +336,7 @@ const petPortalBucket = storage.bucket();
     // GET STATES
     app.get("/states", async(req, res)=>{
         try{
-            const snap = await db.collection('states').get();
+            const snap = await db.collection('states').where('isActive', '==', true).orderBy('name').get();
             const data = snap.docs.map( item => item.data() );
             res.status(200).send(data);
         }catch(error){
@@ -345,7 +347,7 @@ const petPortalBucket = storage.bucket();
     // GET PLACES LIST
     app.get("/places", async(req, res)=>{
         try{
-            const snap = await db.collection('places_list').get();
+            const snap = await db.collection('places_list').where('isActive', '==', true).get();
             const data = snap.docs.map( item => item.data() );
             res.status(200).send(data);
         }catch(error){
@@ -371,7 +373,7 @@ const petPortalBucket = storage.bucket();
     // GET TIPS LIST
     app.get("/tips", async(req, res)=>{
         try{
-            const snap = await db.collection('tips_list').get();
+            const snap = await db.collection('tips_list').where('isActive', '==', true).get();
             const data = snap.docs.map( item => item.data() );
             res.status(200).send(data);
         }catch(error){

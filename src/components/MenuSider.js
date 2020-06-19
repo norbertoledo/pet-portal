@@ -15,7 +15,7 @@ import {
 
 function MenuSider(props) {
     
-    const {isCollapased, location} = props;
+    const {isCollapsed, location} = props;
     const {Sider} = Layout;
     const {Item} = Menu;
 
@@ -25,7 +25,7 @@ function MenuSider(props) {
             className="menu-sider" 
             //-> Con icono del Bottom del sidebar
             collapsible 
-            inlinecollapsed={isCollapased.toString()}
+            inlinecollapsed={isCollapsed.toString()}
             //->Con Icono del MenuTop
             //collapsed={isCollapased}
             >

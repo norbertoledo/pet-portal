@@ -18,7 +18,7 @@ const LayoutAdmin = props => {
     
     const { Header, Content, Footer } = Layout;
     const { routes, location:{pathname} } = props;
-    const [isCollapased, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
     
     const {isLogged, isLoading, authError, authData} = useSelector(state=>state.auth);
 
@@ -26,45 +26,45 @@ const LayoutAdmin = props => {
 
 
     const handleToggleMenu = ()=>{
-        console.log('colapso o abro');
-        setIsCollapsed(!isCollapased);
+        //console.log('colapso o abro');
+        setIsCollapsed(!isCollapsed);
     }
     
     const handleLogout = ()=>{
-        console.log("logout")
+        //console.log("logout")
         dispatch( logoutThunk() );
     }
 
-    const openNotificationError = () => {
+    const openNotificationError = useCallback(() => {
         if(authData.message!==""){
             notification.error({
                 message: authData.message  
             });
         }
 
-      };
+      },[authData]);
     
-      const openNotificationSuccess = () => {
-        console.log("data",authData);
+      const openNotificationSuccess = useCallback(() => {
+        //console.log("data",authData);
         notification.success({
             message: authData.message,
             description: "Bienvenid@ "+authData.data.name  
         });
 
-      };
+      },[authData]);
 
-      const openNotificationLogout = () => {
-        console.log("data",authData);
+      const openNotificationLogout = useCallback(() => {
+        //console.log("data",authData);
         notification.info({
             message: authData.message,
         });
 
-      };
+      },[authData]);
 
 
     useEffect(()=>{
         dispatch( isLoggedThunk() );
-    },[]);
+    },[dispatch]);
 
     useEffect(()=>{
         if(authData.action === "logout") {openNotificationLogout()};
@@ -74,7 +74,7 @@ const LayoutAdmin = props => {
         };
         
 
-    },[dispatch, authError, authData]);
+    },[dispatch, authError, authData, openNotificationLogout, openNotificationError, openNotificationSuccess]);
 
     useEffect(()=>{
         if(isLogged){
@@ -111,7 +111,7 @@ const LayoutAdmin = props => {
                             <Redirect to={pathname === "/admin/login" ? "/admin" : pathname} />
                             <Layout>
                     
-                                <MenuSider isCollapased={isCollapased}/>
+                                <MenuSider isCollapsed={isCollapsed}/>
                     
                                 <Layout className="layout-admin">
                                     
@@ -119,7 +119,7 @@ const LayoutAdmin = props => {
                                         <MenuTop
                                             handleToggleMenu={handleToggleMenu}
                                             handleLogout={handleLogout}
-                                            isCollapased={isCollapased}
+                                            isCollapsed={isCollapsed}
                                         />
                                     </Header>
                                     

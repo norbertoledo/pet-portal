@@ -26,9 +26,9 @@ export const resetUserDataThunk = ()=>
 
 export const signupThunk = ( payload ) => 
 
-    async (dispatch, getState, { auth, db, key, storage }) => {
+    async (dispatch, getState, { db, key, storage }) => {
 
-        const {email, password, name, region, photoUrl, role, isActive, avatar}=payload;
+        const {email, password, name, photoUrl, avatar}=payload;
 
         const newPhotoUrl = !photoUrl ? "" : photoUrl;
   
@@ -159,7 +159,7 @@ export const fetchUsersThunk = () =>
         try{
             const snap = await db.collection('users').get();
             const data = snap.docs.map( item => item.data() );
-            console.log("RECIBIENDO USERS -> ",data);
+            console.log("FETCH USERS DATA -> ",data);
             dispatch(fetchUsersSuccess({data:data, action:"fetchUsers", message:"Listado de usuarios"}))
         }catch(e){
             dispatch(fetchUsersError({data:[], action:"fetchUsers", message:"Listado de usuarios"}));

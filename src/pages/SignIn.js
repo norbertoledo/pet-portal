@@ -1,9 +1,8 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { loginThunk, signupThunk } from '../redux/thunks/authThunk';
+import { loginThunk } from '../redux/thunks/authThunk';
 import { Layout, Tabs } from 'antd';
 import LoginForm from '../components/LoginForm'
-//import SignupForm from '../components/SignupForm';
 
 import logo from '../assets/images/logo/logo_header.png';
 import './scss/SignIn.scss';

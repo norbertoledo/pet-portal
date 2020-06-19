@@ -1,8 +1,8 @@
-import React, {useEffect, useState, Suspense} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { signupThunk, editUserThunk, deleteUserThunk, fetchUsersThunk, resetUserDataThunk } from '../redux/thunks/usersThunk';
-import { Layout, Tabs, notification } from 'antd';
+import { Layout, notification } from 'antd';
 import LoadingSpinner from '../components/LoadingSpinner';
 import UsersList from '../components/UsersList';
 
@@ -12,33 +12,33 @@ export default function Users() {
     const dispatch = useDispatch();
     
     const {userError, userData, usersData} = useSelector(state => state.users);
-    const {statesError, statesData} = useSelector(state => state.states);
+    const {statesData} = useSelector(state => state.states);
 
-    const [states, setStates]=useState([]);
+    const [states, setStates]=useState(statesData);
     const [users, setUsers]=useState([]);
     const [userResponse, setUserResponse]=useState(false);
     
 
-    const setUsersLists = (users)=>{   
+    const setUsersLists = useCallback((users)=>{   
         const activeUsers = users.filter(user=>user.isActive);
         const inactiveUsers = users.filter(user=>!user.isActive);
         const refactorUsers = [activeUsers, inactiveUsers];
         setUsers(refactorUsers);
-    }
+    },[]);
 
     
-    const openNotificationError = () => {    
+    const openNotificationError = useCallback(() => {    
         notification.error({
             message: userData.message  
         });
-    };
+    },[userData]);
     
-    const openNotificationSuccess = () => {
+    const openNotificationSuccess = useCallback(() => {
         console.log("data",userData);
         notification.success({
             message: userData.message
         });
-    };
+    },[userData]);
     
     // HANDLERS
 
@@ -70,12 +70,13 @@ export default function Users() {
             dispatch(resetUserDataThunk());
         };
 
-    },[userError, userData]);
+    },[dispatch, userError, userData, openNotificationError, openNotificationSuccess]);
+
 
 
     useEffect(()=>{
         setStates(statesData.data);
-    },[statesData.data]);
+    },[statesData]);
     
 
     useEffect(()=>{
@@ -83,8 +84,13 @@ export default function Users() {
     },[dispatch]);
 
     useEffect(()=>{
-        setUsersLists(usersData.data);
-    },[usersData.data]);
+        if(usersData.data.length>0){
+            setUsersLists(usersData.data);
+        };
+    },[usersData, setUsersLists]);
+
+//console.log("USERS IS LOADING: -> ", usersIsLoading);
+//console.log("STATES IS LOADING: -> ", statesIsLoading);
 
 
     return (
@@ -92,14 +98,14 @@ export default function Users() {
         <Layout className="users">
             <Content className="users__content">
             {
-                !states.length>0 && users.length>0
-                ? <div className="layout-spinner"><LoadingSpinner/></div>
-                : <Suspense fallback={ <div><LoadingSpinner/></div> }></Suspense>
-            }
-
+                !states.length>0 && !users.length>0
+                ? 
+                <div className="layout-spinner"><LoadingSpinner/></div>
+                : 
                 <UsersList
                     activeUsers={users[0]}
                     inactiveUsers={users[1]}
+                    //users={users}
                     handleSignup={handleSignup}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
@@ -108,6 +114,7 @@ export default function Users() {
                     setUserResponse={setUserResponse}
                 />
 
+            }
 
             </Content>
         </Layout>

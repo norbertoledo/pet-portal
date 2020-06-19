@@ -1,10 +1,10 @@
 import React, {useState} from 'react'
 import { Form, Input, Select, Button} from 'antd';
-import { MailOutlined, UserOutlined, LockOutlined, CheckOutlined, CompassOutlined, CameraOutlined } from '@ant-design/icons';
+import { MailOutlined, UserOutlined, LockOutlined, CheckOutlined, CompassOutlined } from '@ant-design/icons';
 import UploadAvatar from './UploadAvatar';
-import './scss/UserSignUpForm.scss';
+import './scss/UserCreateForm.scss';
 
-export default function SignupForm({handleSignup, states, roles}) {
+export default function UserCreateForm({handleSignup, states, roles}) {
     
     const { Option } = Select;
     const [userData, setUserData]=useState({});

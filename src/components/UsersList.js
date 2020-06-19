@@ -1,24 +1,25 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {Switch, List, Avatar, Button, Radio} from 'antd';
-import { UserOutlined, CheckOutlined, EditOutlined, StopOutlined, DeleteOutlined, SwapOutlined } from '@ant-design/icons';
+import { UserOutlined, CheckOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
 import NoImage from '../assets/images/users/no_image.jpg';
 import Modal from '../components/Modal'
-import SignupForm from './SignupForm';
+import UserCreateForm from './UserCreateForm';
 import UserDeleteForm from './UserDeleteForm';
 import UserStateForm from './UserStateForm';
 import UserEditForm from './UserEditForm';
 
 
 import './scss/UsersList.scss';
-import ColumnGroup from 'antd/lib/table/ColumnGroup';
 
 
 const UsersList = (props) => {
-    const {inactiveUsers, activeUsers, handleSignup, handleEdit, handleDelete, states, userResponse, setUserResponse} = props;
+    const {activeUsers, inactiveUsers, handleSignup, handleEdit, handleDelete, states, userResponse, setUserResponse} = props;
+
+
     const [viewIsActiveUsers, setViewIsActiveUsers] = useState(true);
-    
-    const [filteredActiveUsers, setFilteredActiveUsers] = useState(activeUsers);
-    const [filteredInactiveUsers, setFilteredInactiveUsers] = useState(inactiveUsers);
+ 
+    const [filteredActiveUsers, setFilteredActiveUsers] = useState([]);
+    const [filteredInactiveUsers, setFilteredInactiveUsers] = useState([]);
 
     const [selectedForm, setSelectedForm] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -42,7 +43,7 @@ const UsersList = (props) => {
     const handleCreateUser = () => {
         console.log("EDITAR");
         setModalTitle("Crear Usuario");
-        setSelectedForm(<SignupForm handleSignup={handleSignup} states={states} roles={roles}/>);
+        setSelectedForm(<UserCreateForm handleSignup={handleSignup} states={states} roles={roles}/>);
         setIsModalVisible(true);
     }
 
@@ -99,11 +100,13 @@ const UsersList = (props) => {
         return buttons;
     }
 
-    const resetSelectedData = () => {
+    const resetSelectedData = useCallback(() => {
         setIsModalVisible(false);
         setSelectedForm(null);
         setUserResponse(false);
-    }
+    },[setUserResponse]);
+
+
     const filterUsers = (e)=>{
         
         const dataSource = viewIsActiveUsers ? activeUsers : inactiveUsers;
@@ -120,6 +123,8 @@ const UsersList = (props) => {
                     (key)=>{
                         if(item.role[key]===true && key === e.target.value){
                             return key;
+                        }else{
+                            return null;
                         }
                     }
                     );
@@ -131,36 +136,44 @@ const UsersList = (props) => {
             //dataTo(filtered);
         viewIsActiveUsers ? setFilteredActiveUsers(filtered) : setFilteredInactiveUsers(filtered);
     
-    }
+    };
+
     const getRole = (role)=>{
        const userRole = Object.keys(role).map(key=>{
             if(role[key]===true){ 
                 const rol = roles.filter(item=>{
                     if(item.value===key){
                         return item.name
+                    }else{
+                        return null;
                     }
                 })
                 return rol[0].name;
+            }else{
+                return null;
             }
         });
         return userRole;
     }
 
     useEffect(()=>{
-        if(userResponse){ resetSelectedData() };
-    },[userResponse]);
+        if(userResponse){ 
+            resetSelectedData() 
+        };
+    },[userResponse, resetSelectedData]);
+
 
     useEffect(()=>{
         setFilteredActiveUsers(activeUsers);
         setFilteredInactiveUsers(inactiveUsers);
     }, [activeUsers, inactiveUsers]);
 
+
     
-    //console.log("userResponse: ",userResponse);
+    console.log("--------------------")
     console.log("filteredActiveUsers: ",filteredActiveUsers);
     console.log("filteredInactiveUsers: ",filteredInactiveUsers);
-    console.log("activeUsers: ",activeUsers);
-    
+    console.log("--------------------")
 
 
     return (

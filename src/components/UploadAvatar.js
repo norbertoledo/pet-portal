@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect} from 'react'
+import React, {useCallback} from 'react'
 import { Avatar} from 'antd';
 import { useDropzone} from "react-dropzone";
 import NoImage from '../assets/images/users/no_image.jpg';

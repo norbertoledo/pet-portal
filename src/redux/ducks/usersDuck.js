@@ -22,7 +22,7 @@ export const FETCH_USERS_ERROR = 'FETCH_USERS_ERROR';
 
 //** REDUCERS **//
 const initialState = {
-    isLoading: false, 
+    isLoading: true, 
     userError: false,
     userData:{status:0, action:"", message:""},
     usersData:{data:[], action:"", message:""}

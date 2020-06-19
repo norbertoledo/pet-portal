@@ -1,5 +1,5 @@
 import React from 'react'
-import { Row, Col, Layout, Button } from 'antd';
+import { Row, Col, Layout } from 'antd';
 import logo from '../assets/images/logo/logo_landing.svg';
 import logoGoogle from '../assets/images/stores/logo_google.png';
 import logoApple from '../assets/images/stores/logo_apple.png';
