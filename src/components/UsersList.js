@@ -228,7 +228,7 @@ const UsersList = (props) => {
                 }}
                 dataSource={viewIsActiveUsers ? filteredActiveUsers : filteredInactiveUsers}
                 renderItem={ user => {
-                    const {name, email, city, photoUrl, role} = user;
+                    const {name, email, city, photoUrl, thumbUrl, role} = user;
                     
                     const description = <p><b>[{getRole(role)}]</b> - {email} | {city}</p>
                     const buttons = viewIsActiveUsers ? activeActions(user) : inactiveActions(user);
@@ -237,7 +237,7 @@ const UsersList = (props) => {
                         actions={buttons}
                         >
                             <List.Item.Meta
-                                avatar = {<Avatar src={photoUrl ? photoUrl : NoImage}/>}
+                                //avatar = {<Avatar src={thumbUrl ? thumbUrl : NoImage}/>}
                                 title = {name}
                                 description = {description}
                             />

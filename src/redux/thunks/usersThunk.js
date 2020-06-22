@@ -107,10 +107,8 @@ export const signupThunk = ( payload ) =>
                                 // SAVE DATA INTO DB
                                 db.collection('users').doc(uid).set( dataToSave )
                                     .then(()=>{
-                                        setTimeout(()=>{
-                                            console.log("NEW USER->", name);
-                                            dispatch(signupUserSuccess({status:200, action:"signup", message:`Usuario ${name} creado correctamente`}));
-                                        }, 1500);
+                                        console.log("NEW USER->", name);
+                                        dispatch(signupUserSuccess({status:200, action:"signup", message:`Usuario ${name} creado correctamente`}));
                                     })
                                     .catch(e=>{
                                         dispatch(signupUserError({status:404, action:"signup", message:"No se pudo crear el usuario en la DB"}))
@@ -263,9 +261,7 @@ export const editUserThunk = (payload) =>
             try{
                 db.collection("users").doc(uid).set(dataToSave)
                 .then(()=> {
-                    setTimeout(()=>{
-                        dispatch(editUserSuccess({status:200, action:"edit", message:`Usuario ${name} modificado correctamente`}));
-                    },2000);
+                    dispatch(editUserSuccess({status:200, action:"edit", message:`Usuario ${name} modificado correctamente`}));
                 })
                 .catch((e)=> {
                     console.error("Error writing document: ", e);

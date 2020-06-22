@@ -10,19 +10,19 @@ const { join, dirname, basename, extname } = require('path');
 const sharp = require('sharp');
 sharp.cache(false);
 
-/*
+
 const serviceAccount = require("./key.json");
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     storageBucket: "pet-portal.appspot.com"
 });
-*/
 
+/*
 admin.initializeApp({
     credential: admin.credential.applicationDefault(),
     storageBucket: "pet-portal.appspot.com"
 });
-
+*/
 
 const db = admin.firestore();
 const auth = admin.auth();
@@ -475,8 +475,9 @@ exports.optimizeImages = functions.storage
     
     // Destination dir where the image upload after resizing operations
     const bucketDir = dirname(filePath);
-    
-    await file.delete();
+    if(bucketDir!=='users'){
+        await file.delete();
+    }
 
     // RESIZING IMAGE
     const sizes = [600, 200];
@@ -501,7 +502,7 @@ exports.optimizeImages = functions.storage
 
     // UPLOADS IMAGES TO DESTINATION DIRECTORY
     const files = await fs.readdir(workingDir);
-    console.log(files);
+    //console.log(files);
 
     // Cloud Storage files.
     const metadata = {
