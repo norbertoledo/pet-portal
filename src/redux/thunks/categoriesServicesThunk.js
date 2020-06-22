@@ -209,6 +209,7 @@ async(dispatch, getState, {storage, db}) => {
             ); 
             // END SAVE IMAGE
         }else{
+            delete payload.avatar;
             resolve('OK')
         }
 

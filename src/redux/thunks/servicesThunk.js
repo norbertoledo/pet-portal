@@ -207,6 +207,7 @@ async(dispatch, getState, {storage, db}) => {
             ); 
             // END SAVE IMAGE
         }else{
+            delete dataToSave.avatar;
             resolve('OK')
         }
 

@@ -251,6 +251,7 @@ export const editUserThunk = (payload) =>
                 ); 
 
             }else{
+                delete payload.avatar;
                 resolve('OK');
             }
 
