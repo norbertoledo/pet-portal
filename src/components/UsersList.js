@@ -128,11 +128,10 @@ const UsersList = (props) => {
                         }
                     }
                     );
-                    console.log("selectedKey",selectedKey);
+                    
                     return selectedKey[0];
                 })
         }
-        console.log("filtered", filtered);
             
         viewIsActiveUsers ? setFilteredActiveUsers(filtered) : setFilteredInactiveUsers(filtered);
     
@@ -167,13 +166,6 @@ const UsersList = (props) => {
         setFilteredActiveUsers(activeUsers);
         setFilteredInactiveUsers(inactiveUsers);
     }, [activeUsers, inactiveUsers]);
-
-
-    
-    console.log("--------------------")
-    console.log("filteredActiveUsers: ",filteredActiveUsers);
-    console.log("filteredInactiveUsers: ",filteredInactiveUsers);
-    console.log("--------------------")
 
 
     return (
@@ -222,7 +214,7 @@ const UsersList = (props) => {
                 itemLayout="horizontal"
                 pagination={{
                     onChange: page => {
-                        console.log(page);
+                        //console.log(page);
                     },
                     pageSize: MAX_ITEMS_PAGE,
                 }}

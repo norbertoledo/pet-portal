@@ -39,7 +39,9 @@ export default function ServiceEditForm({handleEdit, entity, categories, states}
 
 
         // AVATAR
-        dataToSend = {...dataToSend, avatar};
+        if(avatar.file){
+            dataToSend = {...dataToSend, avatar};
+        }
 
         // TO SEND
         console.log("dataToSend->", dataToSend);

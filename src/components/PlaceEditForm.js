@@ -37,7 +37,9 @@ export default function PlaceEditForm({handleEdit, entity, categories}) {
         dataToSend = {...dataToSend, color:category.color};
 
         // AVATAR
-        dataToSend = {...dataToSend, avatar};
+        if(avatar.file){
+            dataToSend = {...dataToSend, avatar};
+        }
 
         // TO SEND
         console.log("dataToSend->", dataToSend);

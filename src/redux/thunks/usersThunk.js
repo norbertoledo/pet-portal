@@ -152,6 +152,7 @@ export const fetchUsersThunk = () =>
         }
     }
 
+// DELETE
 export const deleteUserThunk = (payload) =>
     async(dispatch, getstate, {db, storage}) =>{
 
@@ -159,6 +160,7 @@ export const deleteUserThunk = (payload) =>
         const postData = {emailtodelete: payload.email};
         const {uid, name} = payload;
         const storageRef = storage.ref();
+        const origRef = storageRef.child('users/'+uid);
         const imageRef = storageRef.child('users/'+uid+'_image');
         const thumbRef = storageRef.child('users/'+uid+'_thumb');
        
@@ -187,6 +189,7 @@ export const deleteUserThunk = (payload) =>
         
         // DELETE IMAGE STORAGE
         try{
+            await origRef.delete();
             await imageRef.delete();
             await thumbRef.delete();
             dispatch(deleteUserSuccess({status:200, action:"delete", message:`Usuario ${name} eliminado correctamente`}));
@@ -198,16 +201,19 @@ export const deleteUserThunk = (payload) =>
 
     }
 
-
+// EDIT
 export const editUserThunk = (payload) =>
     async(dispatch, getState, {db, storage}) => {
 
         const {uid, name, avatar} = payload;
+        console.log("RECIBO EN THUNK ->", payload);
         let dataToSave = {...payload};
         dispatch(editUserStart());
 
         const promise = new Promise((resolve, reject)=>{
-            if(avatar.file){
+            if(!avatar){
+                resolve('OK');
+            }
                 // File or Blob
                 const file = avatar.file
 
@@ -247,11 +253,6 @@ export const editUserThunk = (payload) =>
                             });
                     }
                 ); 
-
-            }else{
-                delete payload.avatar;
-                resolve('OK');
-            }
 
         });
 

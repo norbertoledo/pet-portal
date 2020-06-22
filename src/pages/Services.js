@@ -47,12 +47,12 @@ const Services = () => {
     }
 
     const handleDelete = (payload) => {
-        console.log('[DELETE SEERVICE: handleDelete]->', payload);       
+        console.log('[DELETE SERVICE: handleDelete]->', payload);       
         dispatch( deleteServiceThunk(payload) );
     }
 
     const handleEdit = (payload) => {
-        console.log('[EDIT PSERVICE: handleEdit]->', payload);       
+        console.log('[EDIT SERVICE: handleEdit]->', payload);       
         dispatch( editServiceThunk(payload) );
     }
 

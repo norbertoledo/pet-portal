@@ -88,7 +88,7 @@ export default function ServiceCreateForm({handleCreate, categories, states}) {
                 name="description"
                 rules={[
                 {
-                    required: false,
+                    required: true,
                     message: 'Ingrese una descripción!',
                 },
                 ]}

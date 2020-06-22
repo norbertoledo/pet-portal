@@ -388,7 +388,7 @@ const petPortalBucket = storage.bucket();
     // GET TIPS LIST
     app.get("/tips", async(req, res)=>{
         try{
-            const snap = await db.collection('tips_list').where('isActive', '==', true).get();
+            const snap = await db.collection('tips_list').where('isActive', '==', true).orderBy('postedAt', 'desc').get();
             const data = snap.docs.map( item => item.data() );
             res.status(200).send(data);
         }catch(error){

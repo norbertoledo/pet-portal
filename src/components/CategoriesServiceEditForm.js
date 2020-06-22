@@ -23,7 +23,9 @@ export default function CategoriesServiceEditForm({handleEdit, entity}) {
         dataToSend = {...entityData, color};
         
         // AVATAR
-        dataToSend = {...dataToSend, avatar};
+        if(avatar.file){
+            dataToSend = {...dataToSend, avatar};
+        }
         
         // TO SEND
         console.log("dataToSend", dataToSend);

@@ -162,56 +162,54 @@ async(dispatch, getState, {storage, db}) => {
     dispatch(editCategoriesServiceStart());
 
     const promise = new Promise((resolve, reject)=>{
-        if(avatar.file){
-            // SAVE IMAGE
-            // File or Blob
-            const file = avatar.file
-    
-            // Create the file metadata
-            const metadata = {
-                contentType: 'image/jpeg',
-                description: "Imagen categoria de servicio"
-    
-            };
-    
-            // Create a root reference
-            const storageRef = storage.ref();
-            // Upload file and metadata to the object 'images/mountains.jpg'
-            let uploadTask = storageRef.child('services_category/' + id).put(file, metadata);
-    
-            // Listen for state changes, errors, and completion of the upload.
-            uploadTask.on(
-                'state_changed', // or 'state_changed'
-                function(snapshot) {
-    
-                }, 
-                function(error) {
-    
-                    reject();
-                }, 
-                function() {
-                    // Upload completed successfully, now we can get the download URL
-                    uploadTask.snapshot.ref.getDownloadURL()
-                        .then(function(downloadURL) {
-    
-                            const {imageUrl, thumbUrl} = customDownloadUrl(downloadURL);
-    
-                            delete dataToSave.avatar;
-                            dataToSave = {...dataToSave, image:imageUrl, thumb:thumbUrl};
-                            console.log("dataToSave in DB->",dataToSave)
-                            resolve('OK')
-                        })
-                        .catch(e=>{
-                            console.log("Error DOWNLOAD URL: "+e.message);
-                            reject();
-                        });
-                }
-            ); 
-            // END SAVE IMAGE
-        }else{
-            delete payload.avatar;
-            resolve('OK')
+        if(!avatar){
+            resolve('OK');
         }
+        // SAVE IMAGE
+        // File or Blob
+        const file = avatar.file
+
+        // Create the file metadata
+        const metadata = {
+            contentType: 'image/jpeg',
+            description: "Imagen categoria de servicio"
+
+        };
+
+        // Create a root reference
+        const storageRef = storage.ref();
+        // Upload file and metadata to the object 'images/mountains.jpg'
+        let uploadTask = storageRef.child('services_category/' + id).put(file, metadata);
+
+        // Listen for state changes, errors, and completion of the upload.
+        uploadTask.on(
+            'state_changed', // or 'state_changed'
+            function(snapshot) {
+
+            }, 
+            function(error) {
+
+                reject();
+            }, 
+            function() {
+                // Upload completed successfully, now we can get the download URL
+                uploadTask.snapshot.ref.getDownloadURL()
+                    .then(function(downloadURL) {
+
+                        const {imageUrl, thumbUrl} = customDownloadUrl(downloadURL);
+
+                        delete dataToSave.avatar;
+                        dataToSave = {...dataToSave, image:imageUrl, thumb:thumbUrl};
+                        console.log("dataToSave in DB->",dataToSave)
+                        resolve('OK')
+                    })
+                    .catch(e=>{
+                        console.log("Error DOWNLOAD URL: "+e.message);
+                        reject();
+                    });
+            }
+        ); 
+        // END SAVE IMAGE
 
     });
 

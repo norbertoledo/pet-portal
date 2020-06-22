@@ -47,7 +47,7 @@ async (dispatch, getState, { db, storage }) => {
     console.log("RECIBO SERVICE ->",payload)
     const {name, avatar}=payload;
     const id = uuid();
-    let dataToSave = {...payload, id:id, image:""};
+    let dataToSave = {...payload, id:id};
     dispatch(createServiceStart());
     // SAVE IMAGE
         // File or Blob
@@ -133,7 +133,7 @@ async(dispatch, getstate, {storage,db}) =>{
     try{
         await db.collection("services").doc(id).delete();
     }catch(e){
-        console.error("Error borrar state: ", e.message);
+        console.error("Error borrar servicio: ", e.message);
         dispatch(deleteServiceError({status:400, action:"delete", message:"No se pudo eliminar el servicio de la DB"}))
     }
     // END DELETE AT DB
@@ -162,54 +162,52 @@ async(dispatch, getState, {storage, db}) => {
     dispatch(editServiceStart());
 
     const promise = new Promise((resolve, reject)=>{
-        if(avatar.file){
-            // SAVE IMAGE
-            // File or Blob
-            const file = avatar.file
-    
-            // Create the file metadata
-            const metadata = {
-                contentType: 'image/jpeg',
-                description: "Imagen de servicio"
-            };
-    
-            // Create a root reference
-            const storageRef = storage.ref();
-            // Upload file and metadata to the object 'images/mountains.jpg'
-            let uploadTask = storageRef.child('services/' + id).put(file, metadata);
-    
-            // Listen for state changes, errors, and completion of the upload.
-            uploadTask.on(
-                'state_changed', // or 'state_changed'
-                function(snapshot) {
-    
-                }, 
-                function(error) {
-                    reject();
-                }, 
-                function() {
-                    // Upload completed successfully, now we can get the download URL
-                    uploadTask.snapshot.ref.getDownloadURL()
-                        .then(function(downloadURL) {
-    
-                            const {imageUrl, thumbUrl} = customDownloadUrl(downloadURL);
-    
-                            delete dataToSave.avatar;
-                            dataToSave = {...dataToSave, image:imageUrl, thumb:thumbUrl};
-                            console.log("dataToSave in DB->",dataToSave)
-                            resolve('OK')
-                        })
-                        .catch(e=>{
-                            console.log("Error DOWNLOAD URL: "+e.message);
-                            reject();
-                        });
-                }
-            ); 
-            // END SAVE IMAGE
-        }else{
-            delete dataToSave.avatar;
-            resolve('OK')
+        if(!avatar){
+            resolve('OK');
         }
+        // SAVE IMAGE
+        // File or Blob
+        const file = avatar.file
+
+        // Create the file metadata
+        const metadata = {
+            contentType: 'image/jpeg',
+            description: "Imagen de servicio"
+        };
+
+        // Create a root reference
+        const storageRef = storage.ref();
+        // Upload file and metadata to the object 'images/mountains.jpg'
+        let uploadTask = storageRef.child('services/' + id).put(file, metadata);
+
+        // Listen for state changes, errors, and completion of the upload.
+        uploadTask.on(
+            'state_changed', // or 'state_changed'
+            function(snapshot) {
+
+            }, 
+            function(error) {
+                reject();
+            }, 
+            function() {
+                // Upload completed successfully, now we can get the download URL
+                uploadTask.snapshot.ref.getDownloadURL()
+                    .then(function(downloadURL) {
+
+                        const {imageUrl, thumbUrl} = customDownloadUrl(downloadURL);
+
+                        delete dataToSave.avatar;
+                        dataToSave = {...dataToSave, image:imageUrl, thumb:thumbUrl};
+                        console.log("dataToSave in DB->",dataToSave)
+                        resolve('OK')
+                    })
+                    .catch(e=>{
+                        console.log("Error DOWNLOAD URL: "+e.message);
+                        reject();
+                    });
+            }
+        ); 
+        // END SAVE IMAGE
 
     });
 

@@ -10,8 +10,6 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
     const [userData, setUserData]=useState(user);
     const [avatar, setAvatar]=useState(null);
 
-    console.log(avatar);
-
     const getRole = ()=>{
         const selectedKey = Object.keys(role).filter(
             (key)=>{
@@ -59,10 +57,12 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
             dataToSend = {...dataToSend, role:newUserRole};
         }
 
-        if(avatar.preview!==photoUrl){
+        // AVATAR
+        if(avatar.file){
             dataToSend = {...dataToSend, avatar};
         }
-        
+
+        console.log("dataToSend->", dataToSend);
         handleEdit(dataToSend);
         
     }
