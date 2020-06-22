@@ -6,6 +6,7 @@ import StateCreateForm from './StateCreateForm';
 import StateEditForm from './StateEditForm';
 import StateDeleteForm from './StateDeleteForm';
 import StateStateForm from './StateStateForm';
+import { MAX_ITEMS_PAGE } from '../utils/constants';
 
 export default function StatesList(props) {
     
@@ -129,7 +130,7 @@ export default function StatesList(props) {
                     onChange: page => {
                         console.log(page);
                     },
-                    pageSize: 6,
+                    pageSize: MAX_ITEMS_PAGE,
                 }}
                 dataSource={viewIsActiveItems ? filteredActiveItems : filteredInactiveItems}
                 renderItem={ entity => {

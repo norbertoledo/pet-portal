@@ -1,57 +1,55 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import {Switch, List, Button} from 'antd';
-import { EnvironmentOutlined, CheckOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
+import {Switch, List, Select, Button} from 'antd';
+import { ShopOutlined, CheckOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
 import Modal from '../components/Modal'
-import CategoriesPlaceCreateForm from './CategoriesPlaceCreateForm';
-import CategoriesPlaceEditForm from './CategoriesPlaceEditForm';
-import CategoriesPlaceStateForm from './CategoriesPlaceStateForm';
-import CategoriesPlaceDeleteForm from './CategoriesPlaceDeleteForm';
+import ServiceCreateForm from './ServiceCreateForm';
+import ServiceEditForm from './ServiceEditForm';
+import ServiceStateForm from './ServiceStateForm';
+import ServiceDeleteForm from './ServiceDeleteForm';
 import { MAX_ITEMS_PAGE } from '../utils/constants';
+import './scss/ServicesList.scss';
 
-export default function CategoriesPlacesList(props) {
-
-    const {activeItems, inactiveItems, handleCreate, handleEdit, handleDelete, dispatchResponse, setDispatchResponse} = props;
-
+export default function ServicesList(props) {
+    const { Option } = Select;
+    const {activeItems, inactiveItems, categories, states, handleCreate, handleEdit, handleDelete, dispatchResponse, setDispatchResponse} = props;
 
     const [viewIsActiveItems, setViewIsActiveItems] = useState(true);
- 
     const [filteredActiveItems, setFilteredActiveItems] = useState([]);
     const [filteredInactiveItems, setFilteredInactiveItems] = useState([]);
-
     const [selectedForm, setSelectedForm] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalTitle, setModalTitle] = useState("");
 
-    const activeItemsTitle = "Lugares Activos";
-    const inactiveItemsTitle = "Lugares Inactivos";
-    const createButtonTitle = "Crear categoría"
+    const activeItemsTitle = "Servicios Activos";
+    const inactiveItemsTitle = "Servicios Inactivos";
+    const createButtonTitle = "Crear servicio"
 
 
     const handleCreateEntity = () => {
         console.log("CREAR");
-        setModalTitle("Crear categoría");
-        setSelectedForm(<CategoriesPlaceCreateForm handleCreate={handleCreate}/>);
+        setModalTitle("Crear servicio");
+        setSelectedForm(<ServiceCreateForm handleCreate={handleCreate} categories={categories} states={states}/>);
         setIsModalVisible(true);
     }
 
     const handleEditEntity = (entity) => {
         console.log("EDITAR");
-        setModalTitle("Editar categoría");
-        setSelectedForm(<CategoriesPlaceEditForm entity={entity} handleEdit={handleEdit}/>);
+        setModalTitle("Editar servicio");
+        setSelectedForm(<ServiceEditForm entity={entity} handleEdit={handleEdit} categories={categories} states={states}/>);
         setIsModalVisible(true);
     }
 
     const handleStateEntity = (entity) => {
         console.log("CAMBIAR ESTADO")
         setModalTitle("Cambiar estado");
-        setSelectedForm(<CategoriesPlaceStateForm entity={entity} handleEdit={handleEdit}/>);
+        setSelectedForm(<ServiceStateForm entity={entity} handleEdit={handleEdit}/>);
         setIsModalVisible(true);
     }
 
     const handleDeleteEntity = (entity) => {
         console.log("ELIMINAR");
-        setModalTitle("Eliminar categoría")
-        setSelectedForm(<CategoriesPlaceDeleteForm entity={entity} handleDelete={handleDelete}/>);
+        setModalTitle("Eliminar servicio")
+        setSelectedForm(<ServiceDeleteForm entity={entity} handleDelete={handleDelete}/>);
         setIsModalVisible(true);
     }
 
@@ -93,6 +91,21 @@ export default function CategoriesPlacesList(props) {
         setDispatchResponse(false);
     },[setDispatchResponse]);
 
+    const filterItems = (e)=>{
+        
+        const dataSource = viewIsActiveItems ? activeItems : inactiveItems;
+        const selectedValue = e; 
+        let filtered = [];
+        
+        if(selectedValue === "all"){
+            filtered = dataSource;
+        }else{
+            filtered = dataSource.filter(item=>(item.category === selectedValue))
+        }
+        console.log("filtered", filtered);
+        viewIsActiveItems ? setFilteredActiveItems(filtered) : setFilteredInactiveItems(filtered);
+    
+    };
 
     useEffect(()=>{
         if(dispatchResponse){ 
@@ -108,23 +121,48 @@ export default function CategoriesPlacesList(props) {
 
 
     return (
-        <div className="items-list">
-            <div className="items-list__header">
+        <div className="services-list">
+            <div className="services-list__header">
                 <Switch
-                    className="items-list__header__switch"
+                    className="services-list__header__switch"
                     defaultChecked
                     onChange={ () => setViewIsActiveItems(!viewIsActiveItems) }
                 />
-                <h4 className="items-list__header__title">
+                <h4 className="services-list__header__title">
                     {viewIsActiveItems ? activeItemsTitle : inactiveItemsTitle}
                 </h4>
+                <div className="services-list__header__filter">
+                    <p className="services-list__header__filter__title">Filtar por:</p>
+                    <Select
+                        className="services-list__header__filter__select"
+                        showSearch
+                        defaultValue={"all"}
+                        onChange={ e=>filterItems( e )  }
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                    >
+                        <Option value={"all"}>Todos</Option>
+                    {
+                        categories.map(item=>(
+                            <Option 
+                            key={item.id} 
+                            value={item.name}>
+                                {item.name}
+                            </Option>
+                        ))
+                    }
+                    </Select> 
+                </div>
 
-                <Button className="items-list__header__button-create" type="primary" danger onClick={()=>handleCreateEntity()}>
-                <EnvironmentOutlined /> {createButtonTitle}
+
+                <Button className="services-list__header__button-create" type="primary" danger onClick={()=>handleCreateEntity()}>
+                <ShopOutlined /> {createButtonTitle}
                 </Button>
             </div>
             <List
-                className="items-list__list"
+                className="services-list__list"
                 itemLayout="horizontal"
                 pagination={{
                     onChange: page => {
@@ -134,8 +172,7 @@ export default function CategoriesPlacesList(props) {
                 }}
                 dataSource={viewIsActiveItems ? filteredActiveItems : filteredInactiveItems}
                 renderItem={ entity => {
-                    const {name} = entity;
-                    
+                    const {name, category, state} = entity;
                     const buttons = viewIsActiveItems ? activeActions(entity) : inactiveActions(entity);
                     return(
                         <List.Item
@@ -143,6 +180,7 @@ export default function CategoriesPlacesList(props) {
                         >
                             <List.Item.Meta
                                 title = {name}
+                                description = {<p>{category} - {state}</p>}
                             />
                         </List.Item>
                     )

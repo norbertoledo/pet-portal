@@ -26,7 +26,10 @@ const CategoriesPlaceEditForm = ({handleEdit, entity}) => {
         <Form
             name="entity_edit"
             className="login-form"
-
+            initialValues={{ 
+                name: name,
+                isActive: isActive
+                }}
             onFinish={handleForm}
             >
             <Form.Item
@@ -41,7 +44,7 @@ const CategoriesPlaceEditForm = ({handleEdit, entity}) => {
                 <Input 
                 prefix={<EnvironmentOutlined className="site-form-item-icon" />} 
                 placeholder="Nombre"
-                defaultValue={name} 
+                //defaultValue={name} 
                 onChange={ e=>setEntityData( {...entityData, name:e.target.value} )  }
                 />
             </Form.Item>
@@ -98,7 +101,7 @@ const CategoriesPlaceEditForm = ({handleEdit, entity}) => {
                         &nbsp; Es activo?
                         </React.Fragment>
                     }
-                    defaultValue={isActive}
+                    //defaultValue={isActive}
                     onChange={ e=>setEntityData( {...entityData, isActive:e} )  }
                     optionFilterProp="children"
                     filterOption={(input, option) =>

@@ -15,7 +15,7 @@ import {
     fetchUsersSuccess,
     fetchUsersError,
 } from '../ducks/usersDuck';
-
+import customDownloadUrl from '../../utils/customDownloadUrl';
 import axios from 'axios';
 
 export const resetUserDataThunk = ()=>
@@ -28,9 +28,8 @@ export const signupThunk = ( payload ) =>
 
     async (dispatch, getState, { db, key, storage }) => {
 
-        const {email, password, name, photoUrl, avatar}=payload;
+        const {email, password, name, avatar}=payload;
 
-        const newPhotoUrl = !photoUrl ? "" : photoUrl;
   
         dispatch(signupUserStart());
         try{
@@ -55,18 +54,13 @@ export const signupThunk = ( payload ) =>
 
             delete payload.password;
             // SAVE IMAGE
-
-            if(avatar){
-
                 // File or Blob
                 const file = avatar.file
     
                 // Create the file metadata
                 const metadata = {
-                    gzip:true,
                     contentType: 'image/jpeg',
                     description: "Imagen de perfil"
-    
                 };
     
                 // Create a root reference
@@ -104,21 +98,24 @@ export const signupThunk = ( payload ) =>
                         // Upload completed successfully, now we can get the download URL
                         uploadTask.snapshot.ref.getDownloadURL()
                             .then(function(downloadURL) {
-                                console.log('File available at', downloadURL);
-                                delete payload.avatar;
-                                const dataToSave = {...payload, photoUrl:downloadURL, uid: uid};
+                                
+                                const {imageUrl, thumbUrl} = customDownloadUrl(downloadURL);
 
+                                delete payload.avatar;
+                                const dataToSave = {...payload, photoUrl:imageUrl, thumbUrl:thumbUrl, uid: uid};
+                                
                                 // SAVE DATA INTO DB
                                 db.collection('users').doc(uid).set( dataToSave )
-                                .then(()=>{
-                                    console.log("NEW USER->", name);
-                                    dispatch(signupUserSuccess({status:200, action:"signup", message:`Usuario ${name} creado correctamente`}));
-                                })
-                                .catch(e=>{
-                                    dispatch(signupUserError({status:404, action:"signup", message:"No se pudo crear el usuario en la DB"}))
-                                });
-                                // END SAVE DATA INTO DB
-    
+                                    .then(()=>{
+                                        setTimeout(()=>{
+                                            console.log("NEW USER->", name);
+                                            dispatch(signupUserSuccess({status:200, action:"signup", message:`Usuario ${name} creado correctamente`}));
+                                        }, 1500);
+                                    })
+                                    .catch(e=>{
+                                        dispatch(signupUserError({status:404, action:"signup", message:"No se pudo crear el usuario en la DB"}))
+                                    });
+                                    // END SAVE DATA INTO DB
                             })
                             .catch(e=>{
                                 console.log("Error: "+e.message);
@@ -126,21 +123,7 @@ export const signupThunk = ( payload ) =>
                     }
                 ); 
                     // END SAVE IMAGE
-            }else{
-
-                // SAVE DATA INTO DB
-                const dataToSave = {...payload, photoUrl:newPhotoUrl, uid: uid};
-                db.collection('users').doc(uid).set(dataToSave)
-                .then(()=>{
-                    console.log("NEW USER->", name);
-                    dispatch(signupUserSuccess({status:200, action:"signup", message:`Usuario ${name} creado correctamente`}));
-                })
-                .catch(e=>{
-                    dispatch(signupUserError({status:404, action:"signup", message:"No se pudo crear el usuario en la DB"}))
-                });
-                // END SAVE DATA INTO DB
-
-            }
+            
 
         }catch(e){
             console.log('ERROR: ', e.message);
@@ -158,9 +141,11 @@ export const fetchUsersThunk = () =>
         console.log("DESPACHO USERS");
         try{
             const snap = await db.collection('users').get();
+            
             const data = snap.docs.map( item => item.data() );
             console.log("FETCH USERS DATA -> ",data);
-            dispatch(fetchUsersSuccess({data:data, action:"fetchUsers", message:"Listado de usuarios"}))
+                dispatch(fetchUsersSuccess({data:data, action:"fetchUsers", message:"Listado de usuarios"}))
+            
         }catch(e){
             dispatch(fetchUsersError({data:[], action:"fetchUsers", message:"Listado de usuarios"}));
         }
@@ -174,9 +159,10 @@ export const deleteUserThunk = (payload) =>
 
         const url = "/api/deleteuser";
         const postData = {emailtodelete: payload.email};
-        const {uid, name, photoUrl} = payload;
+        const {uid, name} = payload;
         const storageRef = storage.ref();
-        const imgRef = storageRef.child('users/'+uid);
+        const imageRef = storageRef.child('users/'+uid+'_image');
+        const thumbRef = storageRef.child('users/'+uid+'_thumb');
        
         dispatch(deleteUserStart());
 
@@ -203,12 +189,10 @@ export const deleteUserThunk = (payload) =>
         
         // DELETE IMAGE STORAGE
         try{
-            if(photoUrl !== ""){
-                await imgRef.delete()
-                dispatch(deleteUserSuccess({status:200, action:"delete", message:`Usuario ${name} eliminado correctamente`}));
-            }else{
-                dispatch(deleteUserSuccess({status:200, action:"delete", message:`Usuario ${name} eliminado correctamente`}));
-            }
+            await imageRef.delete();
+            await thumbRef.delete();
+            dispatch(deleteUserSuccess({status:200, action:"delete", message:`Usuario ${name} eliminado correctamente`}));
+
         }catch(e){
             console.log("Error borrar imagen de storage", e.message);
             dispatch(deleteUserError({status:400, action:"delete", message:"No se pudo eliminar la imagen del usuario"}))
@@ -220,104 +204,77 @@ export const deleteUserThunk = (payload) =>
 export const editUserThunk = (payload) =>
     async(dispatch, getState, {db, storage}) => {
 
-
-        dispatch(editUserStart());
         const {uid, name, avatar} = payload;
+        let dataToSave = {...payload};
+        dispatch(editUserStart());
 
-        if(avatar){
+        const promise = new Promise((resolve, reject)=>{
+            if(avatar.file){
+                // File or Blob
+                const file = avatar.file
 
-            // File or Blob
-            const file = avatar.file
+                // Create the file metadata
+                const metadata = {
+                    contentType: 'image/jpeg',
+                    description: "Imagen de perfil"
+                };
 
-            // Create the file metadata
-            const metadata = {
-                gzip:true,
-                contentType: 'image/jpeg',
-                description: "Imagen de perfil"
+                // Create a root reference
+                const storageRef = storage.ref();
+                // Upload file and metadata to the object 'images/mountains.jpg'
+                let uploadTask = storageRef.child('users/' + uid).put(file, metadata);
 
-            };
+                // Listen for state changes, errors, and completion of the upload.
+                uploadTask.on(
+                    'state_changed', // or 'state_changed'
+                    function(snapshot) {
 
-            // Create a root reference
-            const storageRef = storage.ref();
-            // Upload file and metadata to the object 'images/mountains.jpg'
-            let uploadTask = storageRef.child('users/' + uid).put(file, metadata);
+                    }, 
+                    function(error) {
 
-            // Listen for state changes, errors, and completion of the upload.
-            uploadTask.on(
-                'state_changed', // or 'state_changed'
-                function(snapshot) {
-
-                }, 
-                function(error) {
-
-                    // A full list of error codes is available at
-                    // https://firebase.google.com/docs/storage/web/handle-errors
-                    switch (error.code) {
-                        case 'storage/unauthorized':
-                        // User doesn't have permission to access the object
-                        break;
-
-                        case 'storage/canceled':
-                        // User canceled the upload
-                        break;
-
-                        case 'storage/unknown':
-                        // Unknown error occurred, inspect error.serverResponse
-                        break;
-
-                        default: break;
+                        reject();
+                    }, 
+                    function() {
+                        // Upload completed successfully, now we can get the download URL
+                        uploadTask.snapshot.ref.getDownloadURL()
+                            .then(function(downloadURL) {
+                                const {imageUrl, thumbUrl} = customDownloadUrl(downloadURL);
+                                delete payload.avatar;
+                                dataToSave = {...payload, photoUrl:imageUrl, thumbUrl:thumbUrl};
+                                resolve('OK')
+                            })
+                            .catch(e=>{
+                                console.log("Error: "+e.message);
+                                reject();
+                            });
                     }
-                }, 
-                function() {
-                    // Upload completed successfully, now we can get the download URL
-                    uploadTask.snapshot.ref.getDownloadURL()
-                        .then(function(downloadURL) {
-                            console.log('File available at', downloadURL);
-                            delete payload.avatar;
-                            const dataToSave = {...payload, photoUrl:downloadURL};
+                ); 
 
-                            // save data to DB
-                            db.collection("users").doc(uid).set(dataToSave)
-                                .then(()=> {
-                                    dispatch(editUserSuccess({status:200, action:"edit", message:`Usuario ${name} modificado correctamente`}));
+            }else{
+                resolve('OK');
+            }
 
-                                })
-                                .catch((e)=> {
-                                    console.error("Error writing document: ", e);
-                                    dispatch(editUserError({status:404, action:"edit", message:"No se pudo editar el usuario de la DB"}))
-                                });
-                        })
-                        .catch(e=>{
-                            console.log("Error: "+e.message);
-                        });
-                }
-            ); 
+        });
 
-        }else{
-            // save data to DB
-            db.collection("users").doc(uid).set(payload)
-            .then(()=> {
-                dispatch(editUserSuccess({status:200, action:"edit", message:`Usuario ${name} modificado correctamente`}));
+        const promiseResponse = await promise;
+        if(promiseResponse==='OK'){
+            // SAVE DATA INTO DB
+            try{
+                db.collection("users").doc(uid).set(dataToSave)
+                .then(()=> {
+                    setTimeout(()=>{
+                        dispatch(editUserSuccess({status:200, action:"edit", message:`Usuario ${name} modificado correctamente`}));
+                    },2000);
+                })
+                .catch((e)=> {
+                    console.error("Error writing document: ", e);
+                    dispatch(editUserError({status:404, action:"edit", message:"No se pudo editar el usuario de la DB"}))
+                });
+            }catch(e){
+                console.log('ERROR SAVE INTO DB: ', e.message);
+                dispatch(editUserError({status:404, action:"edit", message:e.message}));
+            }
+            // END SAVE DATA INTO DB
 
-            })
-            .catch((e)=> {
-                console.error("Error writing document: ", e);
-                dispatch(editUserError({status:404, action:"edit", message:"No se pudo editar el usuario de la DB"}))
-            });
         }
-
-        
-
-
     }
-
-
-/*
-// Axios interceptor
-axios.interceptors.request.use(function (config) {
-    const {token} = JSON.parse(localStorage.getItem(ACCESS_TOKEN));
-    config.headers.authorization =  token;
-
-    return config;
-});
-*/

@@ -1,58 +1,120 @@
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchServicesThunk } from '../redux/thunks/servicesThunk';
+import { fetchServicesThunk, createServiceThunk, editServiceThunk, deleteServiceThunk, resetServiceDataThunk } from '../redux/thunks/servicesThunk';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Layout, notification } from 'antd';
+import ServicesList from '../components/ServicesList';
 
 const Services = () => {
     const { Content } = Layout;
-    const {isLoading, servicesError, servicesData} = useSelector(state=>state.services);
     const dispatch = useDispatch();
-    const [services, setServices] = useState([]);
     
+    const {serviceError:itemError, serviceData:itemData, servicesData:itemsData} = useSelector(state=>state.services);
+    const {statesData} = useSelector(state=>state.states);
+    const {categoriesServicesData:categoriesData} = useSelector(state => state.categoriesServices);
+
+    const [categories, setCategories]=useState(categoriesData);
+    const [states, setStates]=useState(statesData);
+    const [items, setItems] = useState([]);
+    const [dispatchResponse, setDispatchResponse]=useState(false);
+
+    const setItemsLists = useCallback((items)=>{   
+        const activeItems = items.filter(item=>item.isActive);
+        const inactiveItems = items.filter(item=>!item.isActive);
+        const refactorItems = [activeItems, inactiveItems];
+        setItems(refactorItems);
+    },[]);
+    
+    
+    const openNotificationError = useCallback(() => {    
+        notification.error({
+            message: itemData.message  
+        });
+    },[itemData]);
+    
+    const openNotificationSuccess = useCallback(() => {
+        console.log("data",itemData);
+        notification.success({
+            message: itemData.message
+        });
+    },[itemData]);
+    
+    // HANDLERS
+
+    const handleCreate = (payload) => {
+        console.log('[CREATE SERVICE: handleCreate]->', payload);       
+        dispatch( createServiceThunk(payload) );
+    }
+
+    const handleDelete = (payload) => {
+        console.log('[DELETE SEERVICE: handleDelete]->', payload);       
+        dispatch( deleteServiceThunk(payload) );
+    }
+
+    const handleEdit = (payload) => {
+        console.log('[EDIT PSERVICE: handleEdit]->', payload);       
+        dispatch( editServiceThunk(payload) );
+    }
+
+
+    useEffect(()=>{
+        if(itemError) {
+            openNotificationError()
+            setDispatchResponse(false);
+        };
+        if(!itemError && itemData.status === 200) {
+            openNotificationSuccess();
+            dispatch(fetchServicesThunk());
+            setDispatchResponse(true);
+            dispatch(resetServiceDataThunk());
+        };
+
+    },[dispatch, itemError, itemData, openNotificationError, openNotificationSuccess]);
+
+    useEffect(()=>{
+        setCategories(categoriesData.data);
+    },[categoriesData]);
+
+    useEffect(()=>{
+        setStates(statesData.data);
+    },[statesData]);
+
     useEffect(()=>{
         dispatch(fetchServicesThunk());
     },[dispatch]);
 
     useEffect(()=>{
-        setServices(servicesData.data);
-    },[servicesData.data]);
-
-    console.log("SERVICES -> ", services);
+        if(itemsData.data.length>0){
+            setItemsLists(itemsData.data);
+        };
+    },[itemsData, setItemsLists]);
 
 
     return (
 
-        <Layout className="users">
-            <Content className="users__content">
-            {
-                !services.length>0
-                ? <div className="layout-spinner"><LoadingSpinner/></div>
-                : <Suspense fallback={ <div><LoadingSpinner/></div> }></Suspense>
-            }
-                
-                <div>
-                    {
-                        services.map( (item,index ) => (
-                            <div key={index}>
-                                <h2>{item.name}</h2>
-                                <p>{item.description}</p>
-                                <p>{item.address}</p>
-                                <p>{item.phone}</p>
-                                <p>{item.website}</p>
-                                <p>{item.state}</p>
-                                <p>{item.category}</p>
-                                <p>{item.latlng.lat}</p>
-                                <p>{item.latlng.long}</p>
-                                <img src={item.thumb} alt={item.title} className="img-responsive"/>
-                                <img src={item.image} alt={item.title} className="img-responsive"/>
-                                <hr/>
-                            </div>
-                        ))
-                    }
-                </div>
-            </Content>
-        </Layout>
+        <Layout className="items">
+        <Content className="items__content">
+        {
+            !items.length>0 && !categories.length>0 && !states.length>0
+            ? 
+            <div className="layout-spinner"><LoadingSpinner/></div>
+            : 
+            <ServicesList
+                states={states}
+                categories={categories}
+                activeItems={items[0]}
+                inactiveItems={items[1]}
+                handleCreate={handleCreate}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                dispatchResponse={dispatchResponse}
+                setDispatchResponse={setDispatchResponse}
+            />
+
+        }
+
+        </Content>
+    </Layout>
         
     )
 }

@@ -1,64 +1,113 @@
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchPlacesThunk } from '../redux/thunks/placesThunk';
+import { fetchPlacesThunk, createPlaceThunk, editPlaceThunk, deletePlaceThunk, resetPlaceDataThunk } from '../redux/thunks/placesThunk';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Layout, Tabs, notification } from 'antd';
+import { Layout, notification } from 'antd';
+import PlacesList from '../components/PlacesList';
 
 export default function Places() {
     const { Content } = Layout;
-    const { TabPane } = Tabs;
-    const {isLoading, placesError, placesData} = useSelector(state=>state.places);
     const dispatch = useDispatch();
-    const [places, setPlaces] = useState([]);
     
+    const {placeError:itemError, placeData:itemData, placesData:itemsData} = useSelector(state=>state.places);
+    const {categoriesPlacesData:categoriesData} = useSelector(state => state.categoriesPlaces);
+
+    const [categories, setCategories]=useState(categoriesData);
+    const [items, setItems] = useState([]);
+    const [dispatchResponse, setDispatchResponse]=useState(false);
+
+    const setItemsLists = useCallback((items)=>{   
+        const activeItems = items.filter(item=>item.isActive);
+        const inactiveItems = items.filter(item=>!item.isActive);
+        const refactorItems = [activeItems, inactiveItems];
+        setItems(refactorItems);
+    },[]);
+    
+    
+    const openNotificationError = useCallback(() => {    
+        notification.error({
+            message: itemData.message  
+        });
+    },[itemData]);
+    
+    const openNotificationSuccess = useCallback(() => {
+        console.log("data",itemData);
+        notification.success({
+            message: itemData.message
+        });
+    },[itemData]);
+    
+    // HANDLERS
+
+    const handleCreate = (payload) => {
+        console.log('[CREATE PLACE: handleCreate]->', payload);       
+        dispatch( createPlaceThunk(payload) );
+    }
+
+    const handleDelete = (payload) => {
+        console.log('[DELETE PLACE: handleDelete]->', payload);       
+        dispatch( deletePlaceThunk(payload) );
+    }
+
+    const handleEdit = (payload) => {
+        console.log('[EDIT PLACE: handleEdit]->', payload);       
+        dispatch( editPlaceThunk(payload) );
+    }
+
+
+    useEffect(()=>{
+        if(itemError) {
+            openNotificationError()
+            setDispatchResponse(false);
+        };
+        if(!itemError && itemData.status === 200) {
+            openNotificationSuccess();
+            dispatch(fetchPlacesThunk());
+            setDispatchResponse(true);
+            dispatch(resetPlaceDataThunk());
+        };
+
+    },[dispatch, itemError, itemData, openNotificationError, openNotificationSuccess]);
+
+    useEffect(()=>{
+        setCategories(categoriesData.data);
+    },[categoriesData]);
+
     useEffect(()=>{
         dispatch(fetchPlacesThunk());
     },[dispatch]);
 
     useEffect(()=>{
-        setPlaces(placesData.data);
-    },[placesData.data]);
-
-    console.log("PLACES -> ", places);
+        if(itemsData.data.length>0){
+            setItemsLists(itemsData.data);
+        };
+    },[itemsData, setItemsLists]);
 
 
     return (
 
-        <Layout className="users">
-            <Content className="users__content">
-            {
-                !places.length>0
-                ? <div className="layout-spinner"><LoadingSpinner/></div>
-                : <Suspense fallback={ <div><LoadingSpinner/></div> }></Suspense>
-            }
-                
-                <div className="users__content-tabs">
-                    <Tabs type="card">
-                        <TabPane tab={<span>Lista de lugares</span>} key="1">
-                            <div>
-                                {
-                                    places.map( (item,index ) => (
-                                        <div key={index}>
-                                            <h2>{item.title}</h2>
-                                            <p>{item.description}</p>
-                                            <p>{item.caption}</p>
-                                            <p>{item.color}</p>
-                                            <p>{item.latlng.lat}</p>
-                                            <p>{item.latlng.long}</p>
-                                            <img src={item.image} alt={item.title} className="img-responsive"/>
-                                            <hr/>
-                                        </div>
-                                    ))
-                                }
-                            </div>
-                        </TabPane>
-                        <TabPane tab={<span>Crear nuevo lugar</span>} key="2">
-                            
-                        </TabPane>
-                    </Tabs>
-                </div>
-            </Content>
-        </Layout>
+        <Layout className="items">
+        <Content className="items__content">
+        {
+            !items.length>0 && !categories.length>0
+            ? 
+            <div className="layout-spinner"><LoadingSpinner/></div>
+            : 
+            <PlacesList
+                categories={categories}
+                activeItems={items[0]}
+                inactiveItems={items[1]}
+                handleCreate={handleCreate}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                dispatchResponse={dispatchResponse}
+                setDispatchResponse={setDispatchResponse}
+            />
+
+        }
+
+        </Content>
+    </Layout>
         
     )
 }

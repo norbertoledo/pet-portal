@@ -11,17 +11,26 @@ export default function StateEditForm({handleEdit, entity}) {
     const {name, latlng:{lat, long}, isActive}=entity;
     
     const handleForm = (value)=>{
-        const latlng = {
-            lat: Number.parseFloat(entityData.lat),
-            long: Number.parseFloat(entityData.long)
-        }
-        
-        delete entityData.lat;
-        delete entityData.long;
-        const dataToSend = {...entityData, latlng};
-        console.log("dataToSend", dataToSend);
 
-        console.log("ENVIO EDIT: ->", entityData);
+        let dataToSend = {};
+        
+        // LATLNG
+        let latlng;
+        if(entityData.lat){
+            latlng = { ...latlng, lat: Number.parseFloat(entityData.lat) }
+            delete entityData.lat;
+        }else{
+            latlng = { ...latlng, lat: lat }
+        }
+        if(entityData.long){
+            latlng = { ...latlng, long: Number.parseFloat(entityData.long)}        
+            delete entityData.long;
+        }else{
+            latlng = { ...latlng, long: long }
+        }
+        dataToSend = {...entityData, latlng};
+
+        console.log("dataToSend", dataToSend);
         handleEdit(dataToSend);
     }
    
@@ -32,7 +41,12 @@ export default function StateEditForm({handleEdit, entity}) {
             <Form
                 name="entity_create"
                 className="login-form"
-
+                initialValues={{ 
+                name: name,
+                latitud: lat,
+                longitud: long,
+                isActive: isActive
+                }}
                 onFinish={handleForm}
                 >
                 <Form.Item
@@ -47,7 +61,7 @@ export default function StateEditForm({handleEdit, entity}) {
                     <Input 
                     prefix={<CompassOutlined className="site-form-item-icon" />} 
                     placeholder="Nombre"
-                    defaultValue={name}
+                    //defaultValue={name}
                     onChange={ e=>setEntityData( {...entityData, name:e.target.value} )  }
                     />
                 </Form.Item>
@@ -66,7 +80,7 @@ export default function StateEditForm({handleEdit, entity}) {
                     <Input 
                     prefix={<ColumnWidthOutlined className="site-form-item-icon" />} 
                     placeholder="Latitud"
-                    defaultValue={lat}
+                    //defaultValue={lat}
                     onChange={ e=>setEntityData( {...entityData, lat:e.target.value} )  }
                     />
                 </Form.Item>
@@ -84,7 +98,7 @@ export default function StateEditForm({handleEdit, entity}) {
                     <Input 
                     prefix={<ColumnHeightOutlined className="site-form-item-icon" />} 
                     placeholder="Longitud"
-                    defaultValue={long}
+                    //defaultValue={long}
                     onChange={ e=>setEntityData( {...entityData, long:e.target.value} )  }
                     />
                 </Form.Item>
@@ -108,7 +122,7 @@ export default function StateEditForm({handleEdit, entity}) {
                             &nbsp; Es activo?
                             </React.Fragment>
                         }
-                        defaultValue={isActive}
+                        //defaultValue={isActive}
                         onChange={ e=>setEntityData( {...entityData, isActive:e} )  }
                         optionFilterProp="children"
                         filterOption={(input, option) =>

@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import { Form, Input, Select, Button} from 'antd';
 import { HighlightOutlined, LinkOutlined, CheckOutlined } from '@ant-design/icons';
+import { MIN_ROWS_TEXTAREA, MAX_ROWS_TEXTAREA } from '../utils/constants';
 import './scss/LinkEditForm.scss';
 
 export default function LinkEditForm({handleEdit, entity}) {
@@ -22,7 +23,12 @@ export default function LinkEditForm({handleEdit, entity}) {
             <Form
                 name="entity_create"
                 className="login-form"
-
+                initialValues={{ 
+                    title: title,
+                    description: description,
+                    link: link,
+                    isActive: isActive
+                }}
                 onFinish={handleForm}
                 >
                 <Form.Item
@@ -37,7 +43,7 @@ export default function LinkEditForm({handleEdit, entity}) {
                     <Input 
                     prefix={<HighlightOutlined className="site-form-item-icon" />} 
                     placeholder="Titulo"
-                    defaultValue={title}
+                    //defaultValue={title}
                     onChange={ e=>setEntityData( {...entityData, title:e.target.value} )  }
                     />
                 </Form.Item>
@@ -53,14 +59,12 @@ export default function LinkEditForm({handleEdit, entity}) {
                     },
                     ]}
                 >
-                    
-                    <Input.Group>
-                        <Input.TextArea
-                        defaultValue={description}
-                        onChange={ e=>setEntityData( {...entityData, description:e.target.value} )  }
-                        autoSize={{ minRows: 3, maxRows: 5 }}
-                        />
-                    </Input.Group>
+                    <Input.TextArea
+                    //defaultValue={description}
+                    onChange={ e=>setEntityData( {...entityData, description:e.target.value} )  }
+                    autoSize={{ minRows: MIN_ROWS_TEXTAREA, maxRows: MAX_ROWS_TEXTAREA }}
+                    />
+
                 </Form.Item>
 
 
@@ -76,7 +80,7 @@ export default function LinkEditForm({handleEdit, entity}) {
                     <Input 
                     prefix={<LinkOutlined className="site-form-item-icon" />} 
                     placeholder="Link"
-                    defaultValue={link}
+                    //defaultValue={link}
                     onChange={ e=>setEntityData( {...entityData, link:e.target.value} )  }
                     />
                 </Form.Item>
@@ -100,7 +104,7 @@ export default function LinkEditForm({handleEdit, entity}) {
                             &nbsp; Es activo?
                             </React.Fragment>
                         }
-                        defaultValue={isActive}
+                        //defaultValue={isActive}
                         onChange={ e=>setEntityData( {...entityData, isActive:e} )  }
                         optionFilterProp="children"
                         filterOption={(input, option) =>

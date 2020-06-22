@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import { Form, Input, Select, Button} from 'antd';
 import { ShopOutlined, BgColorsOutlined, CheckOutlined } from '@ant-design/icons';
-import ColorPicker from '../utils/ColorPicker';
 import UploadAvatar from './UploadAvatar';
+import ColorPicker from '../utils/ColorPicker';
 import './scss/CategoriesServiceEditForm.scss';
 
 
@@ -17,17 +17,23 @@ export default function CategoriesServiceEditForm({handleEdit, entity}) {
     const [showColorPicker, setShowColorPicker] = useState(false);
     
     const handleForm = (value)=>{
-        const dataToSend = {...entityData, color};
+        let dataToSend = {};
+        
+        // COLOR
+        dataToSend = {...entityData, color};
+        
+        // AVATAR
+        dataToSend = {...dataToSend, avatar};
+        
+        // TO SEND
         console.log("dataToSend", dataToSend);
         handleEdit(dataToSend);
     }
 
     useEffect(()=>{
-       
         if(image.length>0){
             setAvatar({...avatar, preview:image});
         }
-        
     },[image])
    
     return (
@@ -41,7 +47,10 @@ export default function CategoriesServiceEditForm({handleEdit, entity}) {
             <Form
                 name="entity_edit"
                 className="login-form"
-
+                initialValues={{ 
+                    name: name,
+                    isActive: isActive
+                }}
                 onFinish={handleForm}
                 >
                 <Form.Item
@@ -56,7 +65,7 @@ export default function CategoriesServiceEditForm({handleEdit, entity}) {
                     <Input 
                     prefix={<ShopOutlined className="site-form-item-icon" />} 
                     placeholder="Nombre"
-                    defaultValue={name}
+                    //defaultValue={name}
                     onChange={ e=>setEntityData( {...entityData, name:e.target.value} )  }
                     />
                 </Form.Item>
@@ -113,7 +122,7 @@ export default function CategoriesServiceEditForm({handleEdit, entity}) {
                             &nbsp; Es activo?
                             </React.Fragment>
                         }
-                        defaultValue={isActive}
+                        //defaultValue={isActive}
                         onChange={ e=>setEntityData( {...entityData, isActive:e} )  }
                         optionFilterProp="children"
                         filterOption={(input, option) =>

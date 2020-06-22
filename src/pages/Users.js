@@ -11,7 +11,7 @@ export default function Users() {
     const { Content } = Layout;
     const dispatch = useDispatch();
     
-    const {userError, userData, usersData} = useSelector(state => state.users);
+    const {isLoading, userError, userData, usersData} = useSelector(state => state.users);
     const {statesData} = useSelector(state => state.states);
 
     const [states, setStates]=useState(statesData);
@@ -89,7 +89,7 @@ export default function Users() {
         };
     },[usersData, setUsersLists]);
 
-//console.log("USERS IS LOADING: -> ", usersIsLoading);
+    console.log("USERS IS LOADING: -> ", isLoading);
 //console.log("STATES IS LOADING: -> ", statesIsLoading);
 
 
@@ -98,14 +98,13 @@ export default function Users() {
         <Layout className="users">
             <Content className="users__content">
             {
-                !states.length>0 && !users.length>0
+                !states.length>0 && !users.length>0 
                 ? 
-                <div className="layout-spinner"><LoadingSpinner/></div>
+                isLoading && <div className="layout-spinner"><LoadingSpinner/></div>
                 : 
                 <UsersList
                     activeUsers={users[0]}
                     inactiveUsers={users[1]}
-                    //users={users}
                     handleSignup={handleSignup}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}

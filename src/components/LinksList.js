@@ -6,7 +6,7 @@ import LinkCreateForm from './LinkCreateForm';
 import LinkDeleteForm from './LinkDeleteForm';
 import LinkStateForm from './LinkStateForm';
 import LinkEditForm from './LinkEditForm';
-
+import { MAX_ITEMS_PAGE } from '../utils/constants';
 import './scss/LinksList.scss';
 
 export default function LinksList(props) {
@@ -163,7 +163,7 @@ export default function LinksList(props) {
                     onChange: page => {
                         console.log(page);
                     },
-                    pageSize: 6,
+                    pageSize: MAX_ITEMS_PAGE,
                 }}
                 dataSource={viewIsActiveItems ? filteredActiveItems : filteredInactiveItems}
                 renderItem={ entity => {

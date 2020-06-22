@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import { Form, Input, Select, Button} from 'antd';
 import { HighlightOutlined, LinkOutlined, CheckOutlined } from '@ant-design/icons';
+import { MIN_ROWS_TEXTAREA, MAX_ROWS_TEXTAREA } from '../utils/constants';
 import './scss/LinkCreateForm.scss';
 
 export default function LinkCreateForm({handleCreate}) {
@@ -49,15 +50,13 @@ export default function LinkCreateForm({handleCreate}) {
                 },
                 ]}
             >
-                <Input.Group>
-                    <Input.TextArea
-                    placeholder={"Descripción"}
-                    onChange={ e=>setEntityData( {...entityData, description:e.target.value} )  }
-                    autoSize={{ minRows: 3, maxRows: 5 }}
-                    />
-                </Input.Group>
-                
-                
+
+                <Input.TextArea
+                placeholder={"Descripción"}
+                onChange={ e=>setEntityData( {...entityData, description:e.target.value} )  }
+                autoSize={{ minRows: MIN_ROWS_TEXTAREA, maxRows: MAX_ROWS_TEXTAREA }}
+                />
+
             </Form.Item>
 
 

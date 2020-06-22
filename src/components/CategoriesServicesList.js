@@ -6,6 +6,7 @@ import CategoriesServiceCreateForm from './CategoriesServiceCreateForm';
 import CategoriesServiceEditForm from './CategoriesServiceEditForm';
 import CategoriesServiceStateForm from './CategoriesServiceStateForm';
 import CategoriesServiceDeleteForm from './CategoriesServiceDeleteForm';
+import { MAX_ITEMS_PAGE } from '../utils/constants';
 
 export default function CategoriesServicesList(props) {
     const {activeItems, inactiveItems, handleCreate, handleEdit, handleDelete, dispatchResponse, setDispatchResponse} = props;
@@ -128,7 +129,7 @@ export default function CategoriesServicesList(props) {
                     onChange: page => {
                         console.log(page);
                     },
-                    pageSize: 6,
+                    pageSize: MAX_ITEMS_PAGE,
                 }}
                 dataSource={viewIsActiveItems ? filteredActiveItems : filteredInactiveItems}
                 renderItem={ entity => {

@@ -23,8 +23,9 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
     
     const handleForm = (value)=>{
         
-        console.log("value",value);
-        //console.log("userData.role: "+userData.role)
+        let dataToSend = {...userData};
+
+        
         if(value.role!==undefined){
             let newUserRole = {
                 admin: false,
@@ -55,15 +56,15 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                 default:
                     break;
             }
-            userData.role = newUserRole;
+            dataToSend = {...dataToSend, role:newUserRole};
         }
 
-        //console.log("userData", {...userData, avatar});
         if(avatar.preview!==photoUrl){
-            handleEdit({...userData, avatar});
-        }else{
-            handleEdit(userData);
+            dataToSend = {...dataToSend, avatar};
         }
+        
+        handleEdit(dataToSend);
+        
     }
 
     useEffect(()=>{
@@ -72,7 +73,8 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
             setAvatar({...avatar, preview:photoUrl});
         }
         
-    },[photoUrl, avatar])
+    },[photoUrl])
+
     
 
     return (
@@ -85,6 +87,12 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
             <Form
                     name="edit_form"
                     className="edit-form"
+                    initialValues={{ 
+                        name: name,
+                        role: getRole(),
+                        region: city,
+                        isActive: isActive
+                    }}
                     onFinish={handleForm}
                     >
                     <Form.Item
@@ -108,7 +116,7 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                         name="name"
                         rules={[
                         {
-                            required: false,
+                            required: true,
                             message: 'Ingrese un nombre!',
                         },
                         ]}
@@ -116,7 +124,7 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                         <Input 
                         prefix={<UserOutlined className="site-form-item-icon" />} 
                         placeholder="Nombre" 
-                        defaultValue={name}
+                        //defaultValue={name}
                         value={name}
                         onChange={ e=>setUserData( {...userData, name:e.target.value} )  }
                         />
@@ -128,7 +136,7 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                         name="role"
                         rules={[
                         {
-                            required: false,
+                            required: true,
                             message: 'Ingrese un rol!',
                         },
                         ]}
@@ -144,7 +152,7 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                                 </React.Fragment>
                             }
                             
-                            defaultValue={getRole}
+                            //defaultValue={getRole}
 
                             optionFilterProp="children"
                             onChange={ e=>setUserData( {...userData, role:e} )  }
@@ -180,14 +188,12 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                         name="region"
                         rules={[
                         {
-                            required: false,
+                            required: true,
                             message: 'Ingrese una region!',
                         },
                         ]}
                     >
-
-
-                        
+                       
                         <Select
                             
                             showSearch
@@ -198,14 +204,9 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                                 &nbsp; Seleccione una región
                                 </React.Fragment>
                             }
-                            defaultValue={city}
+                            //defaultValue={city}
                             onChange={ e=>setUserData( {...userData, city:e} )  }
                             optionFilterProp="children"
-                            //style={{ width: '75%' }}
-                            //onChange={onChange}
-                            //onFocus={onFocus}
-                            //onBlur={onBlur}
-                            //onSearch={onSearch}
                             filterOption={(input, option) =>
                             option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                             }
@@ -240,7 +241,7 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                         name="isActive"
                         rules={[
                         {
-                            required: false,
+                            required: true,
                             message: 'Ingrese estado de actividad!',
                         },
                         ]}
@@ -256,7 +257,7 @@ export default function UserEditForm({handleEdit, user, states, roles}) {
                                 &nbsp; Es activo?
                                 </React.Fragment>
                             }
-                            defaultValue={isActive}
+                            //defaultValue={isActive}
                             onChange={ e=>setUserData( {...userData, isActive:e} )  }
                             optionFilterProp="children"
                             filterOption={(input, option) =>

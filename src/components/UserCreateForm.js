@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import { Form, Input, Select, Button} from 'antd';
 import { MailOutlined, UserOutlined, LockOutlined, CheckOutlined, CompassOutlined } from '@ant-design/icons';
 import UploadAvatar from './UploadAvatar';
+import NoImage from '../assets/images/users/no_image.jpg';
 import './scss/UserCreateForm.scss';
 
 export default function UserCreateForm({handleSignup, states, roles}) {
@@ -10,7 +11,9 @@ export default function UserCreateForm({handleSignup, states, roles}) {
     const [userData, setUserData]=useState({});
     const [avatar, setAvatar]=useState(null);
 
-    const handleForm = (value)=>{
+    const handleForm = async(value)=>{
+
+        let dataToSend = {...userData};
 
         if(value.role!==undefined){
             let newUserRole = {
@@ -42,17 +45,33 @@ export default function UserCreateForm({handleSignup, states, roles}) {
                 default:
                     break;
             }
-            userData.role = newUserRole;
+            //userData.role = newUserRole;
+            dataToSend = {...dataToSend, role:newUserRole};
         }
 
-        
         if(avatar!==null){
-            console.log("dataToSend", {...userData, avatar});
-            handleSignup({...userData, avatar});
+            dataToSend = {...dataToSend, avatar};
         }else{
-            console.log("dataToSend", userData);
-            handleSignup(userData);
+
+            const url = NoImage;
+            //let newBlob = await fetch(url).then(r => r.blob());
+
+            let newFile = await fetch(url)
+            .then(
+                r => r.blob()
+            )
+            .then(
+                blobFile => new File([blobFile], "userimage", { type: "image/jpeg" })
+            )
+
+            const noavatar = {
+                //file: newBlob
+                file: newFile
+            }
+            dataToSend = {...dataToSend, avatar:noavatar};
         }
+        
+        handleSignup(dataToSend);
         
     }
 
@@ -74,6 +93,7 @@ export default function UserCreateForm({handleSignup, states, roles}) {
                         rules={[
                         {
                             required: true,
+                            type: 'email',
                             message: 'Ingrese un Email!',
                         },
                         ]}

@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import {Switch, List, Avatar, Button, Radio} from 'antd';
+import {Switch, List, Avatar, Button, Select} from 'antd';
 import { UserOutlined, CheckOutlined, EditOutlined, StopOutlined, DeleteOutlined } from '@ant-design/icons';
 import NoImage from '../assets/images/users/no_image.jpg';
 import Modal from '../components/Modal'
@@ -7,20 +7,19 @@ import UserCreateForm from './UserCreateForm';
 import UserDeleteForm from './UserDeleteForm';
 import UserStateForm from './UserStateForm';
 import UserEditForm from './UserEditForm';
-
+import { MAX_ITEMS_PAGE } from '../utils/constants';
 
 import './scss/UsersList.scss';
 
 
 const UsersList = (props) => {
+    const { Option } = Select;
+
     const {activeUsers, inactiveUsers, handleSignup, handleEdit, handleDelete, states, userResponse, setUserResponse} = props;
-
-
+    
     const [viewIsActiveUsers, setViewIsActiveUsers] = useState(true);
- 
     const [filteredActiveUsers, setFilteredActiveUsers] = useState([]);
     const [filteredInactiveUsers, setFilteredInactiveUsers] = useState([]);
-
     const [selectedForm, setSelectedForm] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalTitle, setModalTitle] = useState("");
@@ -107,12 +106,13 @@ const UsersList = (props) => {
     },[setUserResponse]);
 
 
-    const filterUsers = (e)=>{
+    const filterItems = (e)=>{
         
         const dataSource = viewIsActiveUsers ? activeUsers : inactiveUsers;
+        const selectedValue = e;
         let filtered = [];
-        console.log("e.target.value", e.target.value);
-        if(e.target.value==="all"){
+        
+        if(selectedValue==="all"){
             filtered = dataSource;
         }else{
 
@@ -121,7 +121,7 @@ const UsersList = (props) => {
                 
                 const selectedKey = Object.keys(item.role).filter(
                     (key)=>{
-                        if(item.role[key]===true && key === e.target.value){
+                        if(item.role[key]===true && key === selectedValue){
                             return key;
                         }else{
                             return null;
@@ -133,7 +133,7 @@ const UsersList = (props) => {
                 })
         }
         console.log("filtered", filtered);
-            //dataTo(filtered);
+            
         viewIsActiveUsers ? setFilteredActiveUsers(filtered) : setFilteredInactiveUsers(filtered);
     
     };
@@ -187,20 +187,31 @@ const UsersList = (props) => {
                 <h4 className="users-list__header__title">
                     {viewIsActiveUsers ? "Usuarios Activos" : "Usuarios Inactivos"}
                 </h4>
-                <Radio.Group className="users-list__header__radio" defaultValue={"all"} onChange={e=>filterUsers(e)}>
-                    <Radio.Button value="all">Todos</Radio.Button>
+                <div className="users-list__header__filter">
+                    <p className="users-list__header__filter__title">Filtar por:</p>
+                    <Select
+                        className="users-list__header__filter__select"
+                        showSearch
+                        defaultValue={"all"}
+                        onChange={ e=>filterItems( e )  }
+                        optionFilterProp="children"
+                        filterOption={(input, option) =>
+                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                    >
+                        <Option value={"all"}>Todos</Option>
                     {
-                        roles.map((item, index) => (
-                            <Radio.Button
-                                key={index}
-                                value={item.value}
-                                label={item.name}
-                            >
+                        roles.map((item, index)=>(
+                            <Option 
+                            key={index} 
+                            value={item.value}>
                                 {item.name}
-                            </Radio.Button>
+                            </Option>
                         ))
                     }
-                </Radio.Group>
+                    </Select> 
+                </div>
+
                 
                 <Button className="users-list__header__button-create" type="primary" danger onClick={()=>handleCreateUser()}>
                 <UserOutlined /> Crear usuario
@@ -213,7 +224,7 @@ const UsersList = (props) => {
                     onChange: page => {
                         console.log(page);
                     },
-                    pageSize: 6,
+                    pageSize: MAX_ITEMS_PAGE,
                 }}
                 dataSource={viewIsActiveUsers ? filteredActiveUsers : filteredInactiveUsers}
                 renderItem={ user => {

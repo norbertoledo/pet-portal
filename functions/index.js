@@ -3,29 +3,35 @@ const admin = require ('firebase-admin');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { uuid } = require('uuidv4');
-
-
-/** MULTIPART BUSBOY */
-/**
- * Parses a 'multipart/form-data' upload request
- *
- * @param {Object} req Cloud Function request context.
- * @param {Object} res Cloud Function response context.
- */
-
 const Busboy = require('busboy');
+const fs = require('fs-extra');
+const { tmpdir } = require('os');
+const { join, dirname, basename, extname } = require('path');
+const sharp = require('sharp');
+sharp.cache(false);
 
-
+/*
+const serviceAccount = require("./key.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "pet-portal.appspot.com"
+});
+*/
 
 admin.initializeApp({
     credential: admin.credential.applicationDefault(),
     storageBucket: "pet-portal.appspot.com"
 });
 
+
 const db = admin.firestore();
 const auth = admin.auth();
 const storage = admin.storage();
 const petPortalBucket = storage.bucket();
+
+
+
+
 
 
     const app = express();
@@ -40,12 +46,12 @@ const petPortalBucket = storage.bucket();
             return next();
         }
         const token = req.headers.authorization;
-        console.log('[Middleware]->token', token);
+        //console.log('[Middleware]->token', token);
         try {
 
             const { uid, email } = await auth.verifyIdToken( token );
             
-            console.log('[Middleware]->uid', uid);
+            //console.log('[Middleware]->uid', uid);
 
             // Mutar el objeto de request para agregar las propiedades de uid e email
             Object.assign( req, {
@@ -101,7 +107,7 @@ const petPortalBucket = storage.bucket();
             const {uid} = req;
             const {email, name, city, photoUrl} = req.body
             
-            console.log("[CREATE USER]-> req.body.city: "+req.body.city);
+            //console.log("[CREATE USER]-> req.body.city: "+req.body.city);
             
             //const user = await auth.getUser(uid);
             await db.collection("users").doc(uid).set({
@@ -132,7 +138,7 @@ const petPortalBucket = storage.bucket();
         try{
             const {uid} = req;
             const {name, city, photoUrl} = req.body
-            console.log(name, city, photoUrl);
+            //console.log(name, city, photoUrl);
             
             const userNewData = {
                 name,
@@ -168,12 +174,13 @@ const petPortalBucket = storage.bucket();
         const {uid} = req;
 
         let newPath = "";
+        const newImagetoken = uuid();
 
 
         // This code will process each non-file field in the form.
         busboy.on('field', (fieldname, val) => {
             // TODO(developer): Process submitted field values here
-            console.log(`Processed field ${fieldname}: ${val}.`);
+            //console.log(`Processed field ${fieldname}: ${val}.`);
             fields[fieldname] = val;
         });
 
@@ -183,7 +190,7 @@ const petPortalBucket = storage.bucket();
         busboy.on('file', (fieldname, file, filename) => {
             // Note: os.tmpdir() points to an in-memory file system on GCF
             // Thus, any files in it must fit in the instance's memory.
-            console.log(`Processed file ${filename}`);
+            //console.log(`Processed file ${filename}`);
             //const filepath = path.join(tmpdir, filename);
             //uploads[fieldname] = filepath;
             uploads[fieldname] = filename;
@@ -194,17 +201,17 @@ const petPortalBucket = storage.bucket();
             const ext = "jpeg";
             const dir = 'users/';
             const newName = uid;
+            
 
             newPath = `${dir}${newName}`;
             //const bucketFile = petPortalBucket.file(dir+filename);
             const bucketFile = petPortalBucket.file(newPath);
             const writeStream = bucketFile.createWriteStream({
-                resumable:false,
-                gzip:true,
+
                 metadata:{
                     contentType: "image/jpeg",
                     metadata:{
-                        firebaseStorageDownloadTokens: uuid(),
+                        firebaseStorageDownloadTokens: newImagetoken,
                         description: "Imagen de perfil"
                     }
                 }
@@ -247,21 +254,29 @@ const petPortalBucket = storage.bucket();
                 }
 
                 try{
+
+  
+                    const bucket_name = "pet-portal.appspot.com";
+                    const file_name = uid;
+                    const token = newImagetoken;
+                    
+                    const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket_name}/o/users%2F${file_name}_image?alt=media&token=${token}`;
+                    const thumbUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket_name}/o/users%2F${file_name}_thumb?alt=media&token=${token}`;
+
                 
                     const userNewImage = {
-                        photoUrl: url
+                        photoUrl: imageUrl, 
+                        thumbUrl: thumbUrl
                     }
-                    await db.collection('users').doc(uid).update(userNewImage).then(
+                    db.collection('users').doc(uid).update(userNewImage).then(
         
-                        res.send({photoUrl: url})
-                        //res.status(200).send({status: "OK"})
+                        res.status(200).send({photoUrl: url, thumbUrl: thumbUrl})
                        
                     ).catch(error=>{
                         console.log(error);
                         res.status(403);
                     });
-    
-                    
+
                 }catch(error){
                     console.log(error);
                     res.status(403);
@@ -276,15 +291,14 @@ const petPortalBucket = storage.bucket();
     });
 
 
-
     // GET USER
     app.get("/users", async(req, res)=>{
         try{
             const {uid} = req;
-            console.log('[GET USER]->uid', uid);
+            //console.log('[GET USER]->uid', uid);
             const snap = await db.collection('users').doc(uid).get();
             const user = await snap.data();
-            console.log('[GET USER]->user', user);
+            //console.log('[GET USER]->user', user);
             res.status(200).send(user);
         }catch(error){
             console.log(error);
@@ -294,7 +308,7 @@ const petPortalBucket = storage.bucket();
 
     // GET LINKS
     app.get("/links", async (req, res)=>{
-        console.log(["GET LINKS"])
+        //console.log(["GET LINKS"])
         try{
             const snap = await db.collection('links').where('isActive', '==', true).get();
             const data = snap.docs.map( item => item.data() );
@@ -308,11 +322,11 @@ const petPortalBucket = storage.bucket();
 
     // GET SERVICE CATEGORIES
     app.get("/services/categories", async(req, res)=>{
-        ["GET SERVICES CATEGORIES"]
+        
         try{
             const snap = await db.collection('services_category').where('isActive', '==', true).orderBy('name').get();
             const data = snap.docs.map( item => item.data() );
-            console.log("[SERVICE RETURN DATA]->", data)
+            //console.log("[SERVICE RETURN DATA]->", data)
             res.status(200).send(data);
         }catch(error){
             console.log("[SERVICE RETURN ERROR]->", error.message)
@@ -323,10 +337,11 @@ const petPortalBucket = storage.bucket();
     // GET SERVICE
     app.get("/services/:state/:category", async(req, res)=>{
         const {state, category} = req.params;
-        console.log("[SERVICE STATE - CATEGORY]->", state, category)
+        //console.log("[SERVICE STATE - CATEGORY]->", state, category)
         try{
             const snap = await db.collection('services').where("state", "==", state).where("category", "==", category).get();
             const data = snap.docs.map( item => item.data() );
+            //console.log("[LISTADO SE SERVICIOS]->", data);
             res.status(200).send(data);
         }catch(error){
             res.status(400).send({message: 'Error. No se puedieron obtener los servicios', error});
@@ -347,7 +362,7 @@ const petPortalBucket = storage.bucket();
     // GET PLACES LIST
     app.get("/places", async(req, res)=>{
         try{
-            const snap = await db.collection('places_list').where('isActive', '==', true).get();
+            const snap = await db.collection('places').where('isActive', '==', true).get();
             const data = snap.docs.map( item => item.data() );
             res.status(200).send(data);
         }catch(error){
@@ -365,7 +380,7 @@ const petPortalBucket = storage.bucket();
             const data = snap.data();
             res.status(200).send(data);
         }catch(error){
-            res.status(400).send({message: 'Error. No se puedieron obtener los tips', error});
+            res.status(400).send({message: 'Error. No se puedieron obtener el lugar', error});
         }
         
     });
@@ -402,3 +417,123 @@ exports.api = functions.https.onRequest( app );
 
 
 
+
+
+
+// Resize Images Trigger function
+exports.optimizeImages = functions.storage
+.object()
+.onFinalize( async object => {
+    console.log('NEW FILE UPLOADED');
+
+    const objectMetadata = object;
+
+    // VALIDATIONS
+    const fileBucket = object.bucket;
+    const filePath = object.name;
+    const contentType = object.contentType;
+
+    if (!fileBucket && !filePath && !contentType){
+        console.log('incomplete data');
+        return false;
+    }
+
+    // Check type file
+    if(!contentType.startsWith('image/')){
+        console.log('This is not an image');
+        return true;
+    }
+
+    // Get the filename
+    const extendName = extname(filePath);
+    const fileName = basename(filePath, extendName);
+    const fileFullName = `${fileName}${extendName}`;
+
+    if(fileName.includes('_thumb')){
+        console.log('Already a Thumbnail');
+        return true;
+    }
+
+    // Ckeck if image has been already optimized
+    const bucket = storage.bucket(fileBucket);
+    const file = bucket.file(filePath);
+
+    const [data] = await file.getMetadata();
+
+    if(data.metadata && data.metadata.resizedImage){
+        console.log('Image has been already optimized');
+        return true;
+    }
+    // END VALIDATIONS
+
+    // CREATE TEMP WORKSPACE
+    const workingDir = join(tmpdir(), 'thumbs');
+    const destination = join(workingDir, fileFullName);
+    
+    await fs.ensureDir(workingDir);
+    await file.download({destination});
+    
+    // Destination dir where the image upload after resizing operations
+    const bucketDir = dirname(filePath);
+    
+    await file.delete();
+
+    // RESIZING IMAGE
+    const sizes = [600, 200];
+    const resizesPromises = sizes.map( (size)=>{
+        
+        let thumbName = "";
+        if(size===sizes[0]){
+            thumbName = `${fileName}_image`;
+        }else{
+            thumbName = `${fileName}_thumb`;
+        }
+       
+        const thumbPath = join(workingDir, thumbName);
+        
+        return sharp(destination)
+        .resize(size)
+        .toFile(thumbPath);
+    });
+    await Promise.all(resizesPromises);
+    console.log('generate 2 images, done!');
+
+
+    // UPLOADS IMAGES TO DESTINATION DIRECTORY
+    const files = await fs.readdir(workingDir);
+    console.log(files);
+
+    // Cloud Storage files.
+    const metadata = {
+        contentDisposition: objectMetadata.contentDisposition,
+        contentEncoding: objectMetadata.contentEncoding,
+        contentLanguage: objectMetadata.contentLanguage,
+        contentType: contentType,
+        metadata: objectMetadata.metadata || {},
+      };
+      metadata.metadata.resizedImage = true;
+
+  
+
+    const uploadPromises = files.map( (file, index) => {
+        if(index>0){
+            const path = join(workingDir, file);
+            return bucket.upload(
+                path,
+                {
+                    destination: join(bucketDir, basename(file)),
+                    metadata
+                }
+            )
+        }else{
+            return false
+        } 
+    });
+
+    await Promise.all(uploadPromises);
+    console.log('upload images, done!')
+
+    return fs.remove(workingDir);
+
+
+});
