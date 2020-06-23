@@ -11,6 +11,7 @@ import MenuSider from '../components/MenuSider';
 
 import { isLoggedThunk, logoutThunk } from '../redux/thunks/authThunk';
 import { fetchStatesThunk } from '../redux/thunks/statesThunk';
+import { fetchRolesThunk } from '../redux/thunks/rolesThunk';
 import { fetchCategoriesPlacesThunk } from '../redux/thunks/categoriesPlacesThunk';
 import { fetchCategoriesServicesThunk } from '../redux/thunks/categoriesServicesThunk';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -81,6 +82,7 @@ const LayoutAdmin = props => {
     useEffect(()=>{
         if(isLogged){
             dispatch(fetchStatesThunk());
+            dispatch(fetchRolesThunk());
             dispatch(fetchCategoriesPlacesThunk());
             dispatch(fetchCategoriesServicesThunk());
         }

@@ -13,6 +13,7 @@ import Links from '../pages/Links';
 import Categories from '../pages/Categories';
 import States from '../pages/States';
 import SignIn from '../pages/SignIn';
+import Roles from '../pages/Roles';
 
 // Error Page
 import ErrorPage from '../pages/ErrorPage';
@@ -80,7 +81,13 @@ const routes = [
                 path: "/admin/states",
                 component: States,
                 exact: true
+            },
+            {
+                path: "/admin/roles",
+                component: Roles,
+                exact: true
             }
+
         ]
     },
     {

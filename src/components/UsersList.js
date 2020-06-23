@@ -15,7 +15,7 @@ import './scss/UsersList.scss';
 const UsersList = (props) => {
     const { Option } = Select;
 
-    const {activeUsers, inactiveUsers, handleSignup, handleEdit, handleDelete, states, userResponse, setUserResponse} = props;
+    const {activeUsers, inactiveUsers, handleSignup, handleEdit, handleDelete, states, roles, userResponse, setUserResponse} = props;
     
     const [viewIsActiveUsers, setViewIsActiveUsers] = useState(true);
     const [filteredActiveUsers, setFilteredActiveUsers] = useState([]);
@@ -24,20 +24,6 @@ const UsersList = (props) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalTitle, setModalTitle] = useState("");
 
-    const roles=[
-        {
-            name: "Administrador",
-            value: "admin"
-        },
-        {
-            name: "Cliente",
-            value: "customer"
-        },
-        {
-            name: "Usuario",
-            value: "user"
-        },
-    ];
 
     const handleCreateUser = () => {
         console.log("EDITAR");

@@ -13,11 +13,27 @@ export default function Users() {
     
     const {isLoading, userError, userData, usersData} = useSelector(state => state.users);
     const {statesData} = useSelector(state => state.states);
+    const {rolesData} = useSelector(state => state.roles);
 
     const [states, setStates]=useState(statesData);
+    //const [roles, setRoles]=useState(rolesData);
     const [users, setUsers]=useState([]);
     const [userResponse, setUserResponse]=useState(false);
     
+    const roles=[
+        {
+            name: "Administrador",
+            value: "admin"
+        },
+        {
+            name: "Cliente",
+            value: "customer"
+        },
+        {
+            name: "Usuario",
+            value: "user"
+        },
+    ];
 
     const setUsersLists = useCallback((users)=>{   
         const activeUsers = users.filter(user=>user.isActive);
@@ -77,7 +93,11 @@ export default function Users() {
     useEffect(()=>{
         setStates(statesData.data);
     },[statesData]);
-    
+    /*
+    useEffect(()=>{
+        setRoles(rolesData.data);
+    },[rolesData]);
+    */
 
     useEffect(()=>{
         dispatch(fetchUsersThunk());
@@ -98,7 +118,7 @@ export default function Users() {
         <Layout className="users">
             <Content className="users__content">
             {
-                !states.length>0 && !users.length>0 
+                !states.length>0 && !users.length>0 && !roles.length>0 
                 ? 
                 isLoading && <div className="layout-spinner"><LoadingSpinner/></div>
                 : 
@@ -109,6 +129,7 @@ export default function Users() {
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
                     states={states}
+                    roles={roles}
                     userResponse={userResponse}
                     setUserResponse={setUserResponse}
                 />

@@ -10,7 +10,8 @@ import {
     UnorderedListOutlined, 
     EnvironmentOutlined, 
     LinkOutlined, 
-    MessageOutlined
+    MessageOutlined,
+    ControlOutlined
 } from '@ant-design/icons';
 
 function MenuSider(props) {
@@ -74,6 +75,12 @@ function MenuSider(props) {
                     <Link to={"/admin/states"}/>
                     <CompassOutlined />
                     <span className="nav-text">Regiones</span>
+                </Item>
+
+                <Item key="/admin/roles">
+                    <Link to={"/admin/roles"}/>
+                    <ControlOutlined />
+                    <span className="nav-text">Roles</span>
                 </Item>
                 
             </Menu>

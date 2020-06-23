@@ -1,0 +1,9 @@
+.entity-state-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &__content {}
+    &__button {
+        margin-top: 20px;
+    }
+}
