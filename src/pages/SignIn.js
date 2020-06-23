@@ -22,7 +22,7 @@ export default function SignIn() {
     return (
         <div>
             <Layout className="signin">
-                <Content className="signin__content">
+                <Content className="">
                     <h1 className="signin__content-logo">
                         <img src={logo} alt="Pet Portal"/>
                     </h1>
