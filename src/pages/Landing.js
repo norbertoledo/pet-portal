@@ -19,12 +19,10 @@ export default function Landing() {
                 <Col className="landing__col">
                     <h2>¿Que te ofrecemos?</h2>
                     <Row>
-
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum officiis perferendis harum laudantium ipsam quasi, perspiciatis ab aspernatur, quo magnam dolore corrupti at eum. Ratione ea unde vel eos iste.</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum officiis perferendis harum laudantium ipsam quasi, perspiciatis ab aspernatur, quo magnam dolore corrupti at eum. Ratione ea unde vel eos iste.</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum officiis perferendis harum laudantium ipsam quasi, perspiciatis ab aspernatur, quo magnam dolore corrupti at eum. Ratione ea unde vel eos iste.</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum officiis perferendis harum laudantium ipsam quasi, perspiciatis ab aspernatur, quo magnam dolore corrupti at eum. Ratione ea unde vel eos iste.</p>
-                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum officiis perferendis harum laudantium ipsam quasi, perspiciatis ab aspernatur, quo magnam dolore corrupti at eum. Ratione ea unde vel eos iste.</p>
+                    <p>Pet Portal es una aplicación móvil con el objetivo brindar información y servicios a lus usuarios y así a satisfacer las necesidades relacionadas con el mantenimiento y cuidado de las mascotas.</p>
+                    <p>Además de la información proporcionada por el portal, la idea es crear una comunidad donde los profesionales relacionados de alguna manera con los animales tengan un lugar para promover su trabajo y ofrecer sus servicios.</p>
+                    <p>Pet Portal posee una interfaz amigable e intuitiva con la vital intención de alcanzal la información requerida sin hacer demasiados pasos.</p>
+                    <p>Pueden disfrutar de Pet Portal de forma gratuita, descargando la aplicación móvil desde los stores.</p>
                     </Row>
                 </Col>
             </Row>
