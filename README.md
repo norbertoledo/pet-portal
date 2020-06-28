@@ -13,7 +13,7 @@ src/services/firebase.js
 $ npm install
 
 ### CLIENT RUN
-$ npm start 
+$ npm start
 
 ------------------------------------------
 
@@ -22,7 +22,7 @@ $ cd/functions
 $ npm install
 
 ### SERVER RUN
-$ npm run serve 
+$ npm run serve
 
 ------------------------------------------
 
